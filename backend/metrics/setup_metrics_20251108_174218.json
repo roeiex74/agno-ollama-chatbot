@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-11-08T15:42:18Z",
+  "setup_start": 1762616538,
+  "steps": {
+    "dependency_check": {
+      "status": "success",
+      "duration_seconds": 0,
+      "details": "all dependencies found"
+    },
+    "ollama_setup": {
+      "status": "success",
+      "duration_seconds": 1,
+      "details": "model already available"
+    },
+    "python_environment": {
+      "status": "success",
+      "duration_seconds": 18,
+      "details": "environment ready"
+    },
+    "configuration": {
+      "status": "success",
+      "duration_seconds": 0,
+      "details": "config ready"
+    },
+    "server_startup": {
+      "status": "success",
+      "duration_seconds": 1,
+      "details": "server running on port 8000"
+    },
+    "sanity_check": {
+      "status": "success",
+      "duration_seconds": 3,
+      "details": "response in 3s"
+    }
+  },
+  "setup_end": 1762616562,
+  "total_duration_seconds": 24,
+  "overall_status": "success"
+}

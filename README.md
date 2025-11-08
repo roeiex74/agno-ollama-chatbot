@@ -23,6 +23,7 @@ make test-all
 ```
 
 This will:
+
 - ✅ Check/install/start Ollama
 - ✅ Download model if needed
 - ✅ Start server
@@ -52,6 +53,7 @@ make setup
 ```
 
 This will:
+
 - ✅ Check Python version
 - ✅ Create virtual environment
 - ✅ Install all dependencies
@@ -67,6 +69,7 @@ make start
 ```
 
 This smart startup script will:
+
 1. ✅ Check if Ollama is installed (provides instructions if not)
 2. ✅ Start Ollama service if not running
 3. ✅ Check if model exists (e.g., `llama3.2:3b`)
@@ -99,6 +102,31 @@ make check-ollama
 
 The server will start at `http://localhost:8000`
 
+### 🎨 Chat UI (Streamlit)
+
+Launch the modern, interactive chat interface:
+
+```bash
+cd backend/scripts
+./launch_ui.sh
+```
+
+This will:
+
+1. ✅ Check if backend server is running
+2. ✅ Install Streamlit if needed
+3. ✅ Launch the UI at `http://localhost:8501`
+
+**Features:**
+
+- 💬 Beautiful gradient design with smooth animations
+- 📊 Real-time metrics (response time, message count)
+- 🔄 Conversation management (new conversation, clear chat)
+- ⚡ Live server status indicator
+- 💾 Session persistence
+
+See [UI_GUIDE.md](UI_GUIDE.md) for detailed documentation.
+
 ### Testing
 
 ```bash
@@ -118,6 +146,7 @@ curl http://localhost:8000/healthz
 ```
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -139,6 +168,7 @@ curl -X POST http://localhost:8000/chat \
 ```
 
 **Response:**
+
 ```json
 {
   "conversation_id": "my-conversation-123",
@@ -151,6 +181,7 @@ curl -X POST http://localhost:8000/chat \
 ```
 
 **Notes:**
+
 - `conversation_id` is optional (auto-generated if omitted)
 - Conversation history is automatically maintained per `conversation_id`
 
@@ -167,6 +198,7 @@ curl -X POST http://localhost:8000/chat/stream \
 ```
 
 **Response (Server-Sent Events):**
+
 ```
 data: {"delta": "Once"}
 
@@ -180,6 +212,7 @@ data: {"done": true, "conversation_id": "uuid-here", "usage": {...}}
 ```
 
 **Notes:**
+
 - Each `data:` line contains a JSON chunk
 - Final chunk has `"done": true` with metadata
 - Use EventSource in JavaScript or SSE clients
@@ -188,24 +221,26 @@ data: {"done": true, "conversation_id": "uuid-here", "usage": {...}}
 
 All configuration is via environment variables (`.env` file):
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ENV` | `local` | Environment: `local` or `prod` |
-| `OLLAMA_MODEL` | `llama3.2:3b` | Ollama model to use |
-| `OLLAMA_HOST` | `http://localhost:11434` | Ollama server URL |
-| `MODEL_TIMEOUT_S` | `60` | Request timeout (seconds) |
-| `MEMORY_BACKEND` | `sqlite` | Memory: `sqlite` or `inmemory` |
-| `MEMORY_PATH` | `./data/memory.sqlite` | SQLite database path |
-| `MAX_HISTORY` | `20` | Max messages per conversation |
+| Variable          | Default                  | Description                    |
+| ----------------- | ------------------------ | ------------------------------ |
+| `ENV`             | `local`                  | Environment: `local` or `prod` |
+| `OLLAMA_MODEL`    | `llama3.2:3b`            | Ollama model to use            |
+| `OLLAMA_HOST`     | `http://localhost:11434` | Ollama server URL              |
+| `MODEL_TIMEOUT_S` | `60`                     | Request timeout (seconds)      |
+| `MEMORY_BACKEND`  | `sqlite`                 | Memory: `sqlite` or `inmemory` |
+| `MEMORY_PATH`     | `./data/memory.sqlite`   | SQLite database path           |
+| `MAX_HISTORY`     | `20`                     | Max messages per conversation  |
 
 ### Switching Models
 
 Edit `.env`:
+
 ```bash
 OLLAMA_MODEL=llama3.3:70b
 ```
 
 Then pull the model:
+
 ```bash
 ollama pull llama3.3:70b
 ```
@@ -213,6 +248,7 @@ ollama pull llama3.3:70b
 ### Using In-Memory Storage (Testing)
 
 Edit `.env`:
+
 ```bash
 MEMORY_BACKEND=inmemory
 ```
@@ -321,6 +357,7 @@ make lint    # requires ruff
 ### Setup Issues
 
 **"Ollama is not installed"**
+
 ```bash
 # macOS/Linux
 curl -fsSL https://ollama.com/install.sh | sh
@@ -329,6 +366,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 ```
 
 **"Model download failed"**
+
 - Check internet connection
 - Try a smaller model: edit `.env` and set `OLLAMA_MODEL=llama3.2:1b`
 - Verify Ollama service is running: `ollama serve`
@@ -336,16 +374,19 @@ curl -fsSL https://ollama.com/install.sh | sh
 ### Runtime Issues
 
 **"Agent not initialized" error**
+
 - Run `make check-ollama` to diagnose
 - Restart with: `make start` (will fix most issues)
 - Check logs for database initialization errors
 
 **Streaming not working**
+
 - Use `curl --no-buffer` or SSE-compatible client
 - Check `Accept: text/event-stream` header
 - Verify nginx/proxy buffering is disabled
 
 **Tests failing**
+
 - Tests use in-memory storage automatically
 - No Ollama required (mocked in tests)
 - Run: `make test`
@@ -366,6 +407,7 @@ MIT (or your preferred license)
 ## Contributing
 
 Contributions welcome! Please:
+
 1. Fork the repo
 2. Create a feature branch
 3. Add tests for new features

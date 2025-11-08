@@ -1,16 +1,13 @@
-.PHONY: help setup start dev test init-db clean check-ollama
+.PHONY: help start dev test init-db clean check-ollama chat
 
 help:  ## Show this help message
 	@echo "Available commands:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-setup:  ## Complete setup (venv, dependencies, .env)
-	./scripts/setup.sh
-
-start:  ## Start the server (checks Ollama, downloads model if needed)
+start:  ## Start the server (auto-setup: venv, dependencies, Ollama, model)
 	./scripts/start.sh
 
-dev:  ## Quick start for development (assumes Ollama is ready)
+dev:  ## Quick start for development (assumes setup is complete)
 	./venv/bin/uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 check-ollama:  ## Check Ollama installation and model availability
@@ -18,9 +15,6 @@ check-ollama:  ## Check Ollama installation and model availability
 	@command -v ollama >/dev/null 2>&1 && echo "✓ Ollama is installed" || echo "✗ Ollama is NOT installed"
 	@curl -s http://localhost:11434/api/tags > /dev/null 2>&1 && echo "✓ Ollama service is running" || echo "✗ Ollama service is NOT running"
 	@[ -f .env ] && export $$(grep -v '^#' .env | xargs) && ollama list | grep -q "$${OLLAMA_MODEL:-llama3.2:3b}" && echo "✓ Model $${OLLAMA_MODEL:-llama3.2:3b} is available" || echo "⚠ Model not downloaded"
-
-install:  ## Install dependencies (legacy, use 'make setup' instead)
-	./venv/bin/pip install -r requirements.txt
 
 init-db:  ## Initialize SQLite database (creates data/ directory)
 	mkdir -p data
@@ -32,17 +26,8 @@ test:  ## Run all tests with pytest
 test-coverage:  ## Run tests with coverage report
 	MEMORY_BACKEND=inmemory ./venv/bin/pytest --cov=app --cov-report=html --cov-report=term
 
-test-api:  ## Test the running API (server must be running)
-	./scripts/test-api.sh
-
-test-all:  ## Fully automated test (starts server, runs all tests, stops server)
-	./scripts/test-full.sh
-
 chat:  ## Interactive chat demo (server must be running)
 	./scripts/chat-demo.sh
-
-quick-test:  ## Quick end-to-end test (server must be running)
-	./scripts/quick-test.sh
 
 clean:  ## Clean up generated files
 	rm -rf __pycache__ .pytest_cache .coverage htmlcov data/*.sqlite
