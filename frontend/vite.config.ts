@@ -31,5 +31,11 @@ export default defineConfig({
         "**/main.tsx",
       ],
     },
+    // Explicit alias resolution for vitest
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
   },
 });
