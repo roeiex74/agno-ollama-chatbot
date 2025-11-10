@@ -20,7 +20,7 @@ async def test_health_check():
     assert data["status"] == "ok"
     assert "environment" in data
     assert "model" in data
-    assert "memory_backend" in data
+    assert "database" in data
 
 
 @pytest.mark.asyncio
@@ -32,7 +32,7 @@ async def test_health_check_structure():
         response = await client.get("/healthz")
 
     data = response.json()
-    required_fields = ["status", "environment", "model", "memory_backend"]
+    required_fields = ["status", "environment", "model", "database"]
 
     for field in required_fields:
         assert field in data, f"Missing required field: {field}"
