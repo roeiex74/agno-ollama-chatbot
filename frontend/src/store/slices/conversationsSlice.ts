@@ -1,7 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import type { Conversation, Message } from "@/types/api";
-import { dummyConversations } from "@/data/conversations";
 
 interface ConversationsState {
   conversations: Conversation[];
@@ -9,8 +8,8 @@ interface ConversationsState {
 }
 
 const initialState: ConversationsState = {
-  conversations: dummyConversations,
-  currentConversationId: dummyConversations[0]?.id || null,
+  conversations: [],
+  currentConversationId: null,
 };
 
 export const conversationsSlice = createSlice({
