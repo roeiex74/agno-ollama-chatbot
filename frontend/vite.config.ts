@@ -12,9 +12,12 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+    alias: [
+      {
+        find: "@",
+        replacement: path.resolve(__dirname, "./src"),
+      },
+    ],
   },
   // @ts-ignore - vitest config types conflict with vite
   test: {
@@ -30,12 +33,6 @@ export default defineConfig({
         "**/*.config.{js,ts}",
         "**/main.tsx",
       ],
-    },
-    // Explicit alias resolution for vitest
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
     },
   },
 });
