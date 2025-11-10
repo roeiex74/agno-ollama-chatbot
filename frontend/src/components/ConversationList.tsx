@@ -18,9 +18,9 @@ export function ConversationList({
   onSelectConversation,
   onNewConversation,
 }: ConversationListProps) {
-  const formatRelativeTime = (date: Date): string => {
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  const formatRelativeTime = (timestamp: number): string => {
+    const now = Date.now();
+    const diffInSeconds = Math.floor((now - timestamp) / 1000);
 
     if (diffInSeconds < 60) return "Just now";
     if (diffInSeconds < 3600)
@@ -30,7 +30,7 @@ export function ConversationList({
     if (diffInSeconds < 604800)
       return `${Math.floor(diffInSeconds / 86400)} days ago`;
 
-    return date.toLocaleDateString([], {
+    return new Date(timestamp).toLocaleDateString([], {
       month: "short",
       day: "numeric",
     });

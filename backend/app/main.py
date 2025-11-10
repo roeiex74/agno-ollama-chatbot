@@ -4,12 +4,18 @@ This module provides:
 - GET /healthz - Health check endpoint
 - POST /chat - Non-streaming chat endpoint
 - POST /chat/stream - Server-sent events (SSE) streaming chat endpoint
+- GET /conversations - List all conversations
+- GET /conversations/{conversation_id} - Get conversation by ID
+- DELETE /conversations/{conversation_id} - Delete conversation
+- PATCH /conversations/{conversation_id}/title - Update conversation title
 """
 
 import json
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, Optional
+from typing import AsyncIterator, List, Optional
 
+from agno.db.base import SessionType
+from agno.db.postgres import PostgresDb
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -17,7 +23,6 @@ from pydantic import BaseModel, Field
 
 from app.agents.chatbot_agent import ChatbotAgent
 from app.config import settings
-from app.memory.store import InMemoryStore, SQLiteStore
 
 
 # Global agent instance
@@ -29,13 +34,10 @@ async def lifespan(app: FastAPI):
     """Manage application lifespan (startup/shutdown)."""
     global chatbot_agent
 
-    # Startup: Initialize memory store and agent
-    if settings.memory_backend.value == "sqlite":
-        memory_store = SQLiteStore(db_path=str(settings.memory_path_resolved))
-    else:
-        memory_store = InMemoryStore()
+    # Startup: Initialize PostgreSQL database and agent
+    db = PostgresDb(db_url=settings.postgres_url)
 
-    chatbot_agent = ChatbotAgent(memory_store=memory_store)
+    chatbot_agent = ChatbotAgent(db=db)
 
     yield
 
@@ -86,7 +88,33 @@ class HealthResponse(BaseModel):
     status: str = Field(..., description="Service status")
     environment: str = Field(..., description="Environment (local/prod)")
     model: str = Field(..., description="Configured Ollama model")
-    memory_backend: str = Field(..., description="Memory backend type")
+    database: str = Field(..., description="Database type")
+
+
+class ConversationSummary(BaseModel):
+    """Conversation summary for list endpoint."""
+
+    conversation_id: str = Field(..., description="Conversation ID")
+    title: Optional[str] = Field(None, description="Conversation title")
+    message_count: int = Field(..., description="Number of messages")
+    created_at: Optional[str] = Field(None, description="Creation timestamp")
+    updated_at: Optional[str] = Field(None, description="Last update timestamp")
+
+
+class ConversationDetail(BaseModel):
+    """Detailed conversation with full history."""
+
+    conversation_id: str = Field(..., description="Conversation ID")
+    title: Optional[str] = Field(None, description="Conversation title")
+    messages: List[dict] = Field(..., description="Conversation messages")
+    created_at: Optional[str] = Field(None, description="Creation timestamp")
+    updated_at: Optional[str] = Field(None, description="Last update timestamp")
+
+
+class UpdateTitleRequest(BaseModel):
+    """Request to update conversation title."""
+
+    title: str = Field(..., description="New conversation title")
 
 
 # Endpoints
@@ -101,7 +129,7 @@ async def health_check() -> HealthResponse:
         status="ok",
         environment=settings.env.value,
         model=settings.ollama_model,
-        memory_backend=settings.memory_backend.value,
+        database="postgresql",
     )
 
 
@@ -178,6 +206,252 @@ async def chat_stream(request: ChatRequest) -> StreamingResponse:
     )
 
 
+@app.get("/conversations", response_model=List[ConversationSummary])
+async def list_conversations() -> List[ConversationSummary]:
+    """List all conversations.
+
+    Returns:
+        List of conversation summaries with metadata
+
+    Raises:
+        HTTPException: If agent is not initialized or error occurs
+    """
+    if chatbot_agent is None:
+        raise HTTPException(status_code=503, detail="Agent not initialized")
+
+    try:
+        # Get all agent sessions from database
+        sessions = chatbot_agent.db.get_sessions(session_type=SessionType.AGENT)
+
+        # Convert to conversation summaries
+        summaries = []
+        for session in sessions:
+            # Get chat history from session
+            chat_history = session.get_chat_history()
+
+            # Count only user and assistant messages (exclude system)
+            message_count = 0
+            if chat_history:
+                for msg in chat_history:
+                    role = None
+                    if hasattr(msg, 'role'):
+                        role = msg.role
+                    elif isinstance(msg, dict):
+                        role = msg.get("role")
+
+                    if role in ["user", "assistant"]:
+                        message_count += 1
+
+            # Get title from session_data if available, or use first user message
+            title = "New Chat"
+            if session.session_data and isinstance(session.session_data, dict):
+                title = session.session_data.get("name", title)
+
+            # If no custom title, use first user message
+            if title == "New Chat" and chat_history and len(chat_history) > 0:
+                for msg in chat_history:
+                    msg_role = None
+                    msg_content = None
+                    if hasattr(msg, 'role'):
+                        msg_role = msg.role
+                        msg_content = getattr(msg, 'content', "")
+                    elif isinstance(msg, dict):
+                        msg_role = msg.get("role")
+                        msg_content = msg.get("content", "")
+
+                    if msg_role == "user" and msg_content:
+                        title = msg_content[:50] + ("..." if len(msg_content) > 50 else "")
+                        break
+
+            # Convert timestamps (epoch integers) to ISO format strings
+            created_at_str = None
+            if session.created_at:
+                from datetime import datetime
+                created_at_str = datetime.fromtimestamp(session.created_at).isoformat()
+
+            updated_at_str = None
+            if session.updated_at:
+                from datetime import datetime
+                updated_at_str = datetime.fromtimestamp(session.updated_at).isoformat()
+
+            summaries.append(
+                ConversationSummary(
+                    conversation_id=session.session_id,
+                    title=title,
+                    message_count=message_count,
+                    created_at=created_at_str,
+                    updated_at=updated_at_str,
+                )
+            )
+
+        return summaries
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error listing conversations: {str(e)}"
+        )
+
+
+@app.get("/conversations/{conversation_id}", response_model=ConversationDetail)
+async def get_conversation(conversation_id: str) -> ConversationDetail:
+    """Get conversation by ID with full message history.
+
+    Args:
+        conversation_id: Conversation ID to retrieve
+
+    Returns:
+        Detailed conversation with all messages
+
+    Raises:
+        HTTPException: If agent is not initialized, conversation not found, or error occurs
+    """
+    if chatbot_agent is None:
+        raise HTTPException(status_code=503, detail="Agent not initialized")
+
+    try:
+        # Read session from database
+        session = chatbot_agent.db.get_session(
+            session_id=conversation_id,
+            session_type=SessionType.AGENT
+        )
+
+        if session is None:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # Get chat history from session
+        chat_history = session.get_chat_history()
+
+        # Convert Message objects to dictionaries and filter out system messages
+        messages = []
+        if chat_history:
+            for msg in chat_history:
+                msg_dict = None
+                if hasattr(msg, 'to_dict'):
+                    msg_dict = msg.to_dict()
+                elif hasattr(msg, 'role') and hasattr(msg, 'content'):
+                    # Convert Message object to dict manually
+                    msg_dict = {
+                        "role": msg.role,
+                        "content": msg.content
+                    }
+                elif isinstance(msg, dict):
+                    msg_dict = msg
+
+                # Only include user and assistant messages, skip system messages
+                if msg_dict and msg_dict.get("role") in ["user", "assistant"]:
+                    messages.append(msg_dict)
+
+        # Get title from session_data or use first message
+        title = "New Chat"
+        if session.session_data and isinstance(session.session_data, dict):
+            title = session.session_data.get("name", title)
+
+        if title == "New Chat" and messages and len(messages) > 0:
+            first_message = messages[0]
+            if isinstance(first_message, dict) and first_message.get("role") == "user":
+                content = first_message.get("content", "")
+                title = content[:50] + ("..." if len(content) > 50 else "")
+
+        # Convert timestamps (epoch integers) to ISO format strings
+        from datetime import datetime
+        created_at_str = None
+        if session.created_at:
+            created_at_str = datetime.fromtimestamp(session.created_at).isoformat()
+
+        updated_at_str = None
+        if session.updated_at:
+            updated_at_str = datetime.fromtimestamp(session.updated_at).isoformat()
+
+        return ConversationDetail(
+            conversation_id=session.session_id,
+            title=title,
+            messages=messages,
+            created_at=created_at_str,
+            updated_at=updated_at_str,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving conversation: {str(e)}"
+        )
+
+
+@app.delete("/conversations/{conversation_id}")
+async def delete_conversation(conversation_id: str) -> dict:
+    """Delete conversation by ID.
+
+    Args:
+        conversation_id: Conversation ID to delete
+
+    Returns:
+        Success confirmation
+
+    Raises:
+        HTTPException: If agent is not initialized or error occurs
+    """
+    if chatbot_agent is None:
+        raise HTTPException(status_code=503, detail="Agent not initialized")
+
+    try:
+        # Delete session from database
+        chatbot_agent.db.delete_session(conversation_id)
+
+        return {"status": "success", "conversation_id": conversation_id}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error deleting conversation: {str(e)}"
+        )
+
+
+@app.patch("/conversations/{conversation_id}/title")
+async def update_conversation_title(
+    conversation_id: str, request: UpdateTitleRequest
+) -> dict:
+    """Update conversation title.
+
+    Args:
+        conversation_id: Conversation ID to update
+        request: New title
+
+    Returns:
+        Success confirmation with updated title
+
+    Raises:
+        HTTPException: If agent is not initialized, conversation not found, or error occurs
+    """
+    if chatbot_agent is None:
+        raise HTTPException(status_code=503, detail="Agent not initialized")
+
+    try:
+        # Get the session
+        session = chatbot_agent.db.get_session(
+            session_id=conversation_id,
+            session_type=SessionType.AGENT
+        )
+
+        if session is None:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # Update session_data with the new name
+        if session.session_data is None:
+            session.session_data = {}
+
+        session.session_data["name"] = request.title
+
+        # Upsert the session back to the database
+        chatbot_agent.db.upsert_session(session)
+
+        return {
+            "status": "success",
+            "conversation_id": conversation_id,
+            "title": request.title,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error updating conversation title: {str(e)}"
+        )
 
 
 if __name__ == "__main__":

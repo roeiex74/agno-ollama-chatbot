@@ -1,31 +1,31 @@
-"""Chatbot agent using Agno with Ollama backend.
+"""Chatbot agent using Agno with Ollama backend and PostgreSQL storage.
 
 This agent integrates:
-- Agno for agent orchestration
+- Agno for agent orchestration with native PostgreSQL storage
 - Ollama for local LLM inference
-- Memory management for conversation history
+- Automatic conversation history management via Agno's db layer
 """
 
 import uuid
-from typing import AsyncIterator, Dict, List, Optional
+from typing import AsyncIterator, Dict, Optional
 
 from agno.agent import Agent
+from agno.db.postgres import PostgresDb
 from agno.models.ollama import Ollama
 
 from app.config import settings
-from app.memory.store import MemoryStore
 
 
 class ChatbotAgent:
-    """Agno-powered chatbot with streaming and memory support."""
+    """Agno-powered chatbot with streaming and PostgreSQL memory support."""
 
-    def __init__(self, memory_store: MemoryStore):
+    def __init__(self, db: PostgresDb):
         """Initialize chatbot agent.
 
         Args:
-            memory_store: Memory store for conversation history
+            db: PostgresDb instance for conversation storage
         """
-        self.memory_store = memory_store
+        self.db = db
 
         # Initialize Agno model
         self.model = Ollama(
@@ -54,90 +54,73 @@ class ChatbotAgent:
         if conversation_id is None:
             conversation_id = str(uuid.uuid4())
 
-        # Load conversation history
-        history = self.memory_store.load(conversation_id)
-
-        # Append user message to history
-        self.memory_store.append(conversation_id, "user", message)
-
-        # Truncate if needed
-        self.memory_store.truncate(conversation_id, settings.max_history)
-
-        # Build messages for agent
-        messages = history + [{"role": "user", "content": message}]
-
         if stream:
-            return self._chat_stream(conversation_id, messages)
+            return self._chat_stream(conversation_id, message)
         else:
-            return await self._chat_complete(conversation_id, messages)
+            return await self._chat_complete(conversation_id, message)
 
-    async def _chat_complete(
-        self, conversation_id: str, messages: List[Dict[str, str]]
-    ) -> Dict:
+    async def _chat_complete(self, conversation_id: str, message: str) -> Dict:
         """Handle non-streaming chat completion."""
+        # Create agent with PostgreSQL storage
+        # Agno automatically loads history when session_id is provided
         agent = Agent(
             model=self.model,
+            db=self.db,
+            session_id=conversation_id,
+            add_history_to_context=True,
+            num_history_runs=settings.max_history,
             markdown=False,
             description="You are a helpful AI assistant powered by Agno and Ollama.",
         )
 
-        # Get response from agent
-        # Convert our message format to Agno's expected format
-        user_message = messages[-1]["content"]
-
-        # Run agent
-        response = await agent.arun(input=user_message)
+        # Run agent - Agno handles history loading and saving automatically
+        response = await agent.arun(input=message)
 
         # Extract reply
         reply = response.content if hasattr(response, "content") else str(response)
-
-        # Store assistant response
-        self.memory_store.append(conversation_id, "assistant", reply)
 
         return {
             "conversation_id": conversation_id,
             "reply": reply,
             "usage": {
                 "model": settings.ollama_model,
-                "messages": len(messages) + 1,
             },
         }
 
     async def _chat_stream(
-        self, conversation_id: str, messages: List[Dict[str, str]]
+        self, conversation_id: str, message: str
     ) -> AsyncIterator[Dict]:
         """Handle streaming chat completion."""
+        # Create agent with PostgreSQL storage
         agent = Agent(
             model=self.model,
+            db=self.db,
+            session_id=conversation_id,
+            add_history_to_context=True,
+            num_history_runs=settings.max_history,
             markdown=False,
             description="You are a helpful AI assistant powered by Agno and Ollama.",
         )
 
-        # Get user message
-        user_message = messages[-1]["content"]
-
-        # Stream response
+        # Stream response - Agno automatically saves to DB after completion
         full_reply = ""
-        async for chunk in agent.arun(input=user_message, stream=True):
+        async for chunk in agent.arun(input=message, stream=True):
             delta = chunk.content if hasattr(chunk, "content") else str(chunk)
             full_reply += delta
 
             # Yield delta chunk
             yield {"delta": delta}
 
-        # Store complete assistant response
-        self.memory_store.append(conversation_id, "assistant", full_reply)
-
         # Yield final chunk with metadata
         yield {
             "done": True,
             "conversation_id": conversation_id,
+            "response": full_reply,
             "usage": {
                 "model": settings.ollama_model,
-                "messages": len(messages) + 1,
             },
         }
 
     async def cleanup(self):
         """Cleanup resources."""
-        pass  # No resources to cleanup currently
+        pass  # No resources to cleanup - PostgresDb handles connections

@@ -1,15 +1,20 @@
 import { useCallback, useRef } from "react";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   addMessage,
   updateLastAssistantMessage,
+  updateConversationTitle,
+  selectAllConversations,
 } from "@/store/slices/conversationsSlice";
 import { setStreaming, setError } from "@/store/slices/uiSlice";
 import { API_CONFIG } from "@/config/api";
 import type { Message, StreamChunk } from "@/types/api";
+import { useUpdateConversationTitleMutation } from "@/store/api/conversationsApi";
 
 export function useStreamingChat() {
   const dispatch = useAppDispatch();
+  const conversations = useAppSelector(selectAllConversations);
+  const [updateTitle] = useUpdateConversationTitleMutation();
   const abortControllerRef = useRef<AbortController | null>(null);
   const accumulatedContentRef = useRef<string>("");
 
@@ -20,7 +25,7 @@ export function useStreamingChat() {
         id: `msg-${Date.now()}`,
         role: "user",
         content: message,
-        timestamp: new Date(),
+        timestamp: Date.now(), // Use number timestamp instead of Date object
       };
 
       dispatch(addMessage({ conversationId, message: userMessage }));
@@ -30,7 +35,7 @@ export function useStreamingChat() {
         id: `msg-${Date.now()}-assistant`,
         role: "assistant",
         content: "",
-        timestamp: new Date(),
+        timestamp: Date.now(), // Use number timestamp instead of Date object
       };
 
       dispatch(addMessage({ conversationId, message: assistantMessage }));
@@ -111,6 +116,25 @@ export function useStreamingChat() {
                       })
                     );
                   }
+
+                  // Check if this is the first message and update title
+                  const conversation = conversations.find((c) => c.id === conversationId);
+                  if (conversation && conversation.title === "New Chat") {
+                    // Generate title from first user message
+                    const title = message.slice(0, 50) + (message.length > 50 ? "..." : "");
+
+                    // Update title in backend
+                    updateTitle({ conversationId, title })
+                      .unwrap()
+                      .then(() => {
+                        // Update title in Redux
+                        dispatch(updateConversationTitle({ conversationId, title }));
+                      })
+                      .catch((error) => {
+                        console.error("Failed to update conversation title:", error);
+                      });
+                  }
+
                   dispatch(setStreaming(false));
                   abortControllerRef.current = null;
                 } else if ("delta" in parsed) {
@@ -143,7 +167,7 @@ export function useStreamingChat() {
         dispatch(setStreaming(false));
       }
     },
-    [dispatch]
+    [dispatch, conversations, updateTitle]
   );
 
   const cancelStream = useCallback(() => {

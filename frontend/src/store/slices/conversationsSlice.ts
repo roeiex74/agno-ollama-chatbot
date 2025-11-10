@@ -17,8 +17,13 @@ export const conversationsSlice = createSlice({
   initialState,
   reducers: {
     // Set current conversation
-    setCurrentConversation: (state, action: PayloadAction<string>) => {
+    setCurrentConversation: (state, action: PayloadAction<string | null>) => {
       state.currentConversationId = action.payload;
+    },
+
+    // Load conversations from backend
+    setConversations: (state, action: PayloadAction<Conversation[]>) => {
+      state.conversations = action.payload;
     },
 
     // Add new conversation
@@ -37,7 +42,7 @@ export const conversationsSlice = createSlice({
       );
       if (conversation) {
         conversation.messages.push(action.payload.message);
-        conversation.updatedAt = new Date();
+        conversation.updatedAt = Date.now();
 
         // Update title if it's the first user message
         if (
@@ -68,6 +73,32 @@ export const conversationsSlice = createSlice({
       }
     },
 
+    // Update conversation title
+    updateConversationTitle: (
+      state,
+      action: PayloadAction<{ conversationId: string; title: string }>
+    ) => {
+      const conversation = state.conversations.find(
+        (c) => c.id === action.payload.conversationId
+      );
+      if (conversation) {
+        conversation.title = action.payload.title;
+      }
+    },
+
+    // Clear messages for a specific conversation
+    clearCurrentConversationMessages: (
+      state,
+      action: PayloadAction<string>
+    ) => {
+      const conversation = state.conversations.find(
+        (c) => c.id === action.payload
+      );
+      if (conversation) {
+        conversation.messages = [];
+      }
+    },
+
     // Clear all conversations
     clearConversations: (state) => {
       state.conversations = [];
@@ -78,9 +109,12 @@ export const conversationsSlice = createSlice({
 
 export const {
   setCurrentConversation,
+  setConversations,
   addConversation,
   addMessage,
   updateLastAssistantMessage,
+  updateConversationTitle,
+  clearCurrentConversationMessages,
   clearConversations,
 } = conversationsSlice.actions;
 

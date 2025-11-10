@@ -1,7 +1,6 @@
 """Configuration management using pydantic-settings."""
 
 from enum import Enum
-from pathlib import Path
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,13 +11,6 @@ class Environment(str, Enum):
 
     LOCAL = "local"
     PROD = "prod"
-
-
-class MemoryBackend(str, Enum):
-    """Memory backend types."""
-
-    SQLITE = "sqlite"
-    INMEMORY = "inmemory"
 
 
 class Settings(BaseSettings):
@@ -45,12 +37,10 @@ class Settings(BaseSettings):
         default=60, description="Model request timeout in seconds"
     )
 
-    # Memory configuration
-    memory_backend: MemoryBackend = Field(
-        default=MemoryBackend.SQLITE, description="Memory backend type"
-    )
-    memory_path: str = Field(
-        default="./data/memory.sqlite", description="SQLite database path"
+    # Database configuration
+    postgres_url: str = Field(
+        default="postgresql+psycopg://user:pass@localhost:5432/db",
+        description="PostgreSQL connection URL"
     )
     max_history: int = Field(
         default=20, description="Maximum conversation history to maintain"
@@ -64,11 +54,6 @@ class Settings(BaseSettings):
     def is_prod(self) -> bool:
         """Check if running in production."""
         return self.env == Environment.PROD
-
-    @property
-    def memory_path_resolved(self) -> Path:
-        """Get resolved memory path."""
-        return Path(self.memory_path).resolve()
 
 
 # Global settings instance
