@@ -6,7 +6,7 @@ import {
   setCurrentConversation,
   addConversation,
 } from "./store/slices/conversationsSlice";
-import { selectIsLoading, selectIsStreaming } from "./store/slices/uiSlice";
+import { selectIsStreaming } from "./store/slices/uiSlice";
 import { useStreamingChat } from "./hooks/useStreamingChat";
 import { createNewConversation } from "./data/conversations";
 
@@ -14,10 +14,9 @@ function App() {
   const dispatch = useAppDispatch();
   const conversations = useAppSelector(selectAllConversations);
   const currentConversationId = useAppSelector(selectCurrentConversationId);
-  const isLoading = useAppSelector(selectIsLoading);
   const isStreaming = useAppSelector(selectIsStreaming);
 
-  const { sendStreamingMessage } = useStreamingChat();
+  const { sendStreamingMessage, cancelStream } = useStreamingChat();
 
   const handleSelectConversation = (conversationId: string) => {
     dispatch(setCurrentConversation(conversationId));
@@ -49,7 +48,8 @@ function App() {
       onSelectConversation={handleSelectConversation}
       onNewConversation={handleNewConversation}
       onSendMessage={handleSendMessage}
-      isLoading={isLoading || isStreaming}
+      onCancelStream={cancelStream}
+      isStreaming={isStreaming}
     />
   );
 }

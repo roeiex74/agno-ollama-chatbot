@@ -6,10 +6,10 @@ import type { Message } from "@/data/conversations";
 
 interface ChatAreaProps {
   messages: Message[];
-  isLoading?: boolean;
+  isStreaming?: boolean;
 }
 
-export function ChatArea({ messages, isLoading = false }: ChatAreaProps) {
+export function ChatArea({ messages, isStreaming = false }: ChatAreaProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -37,32 +37,23 @@ export function ChatArea({ messages, isLoading = false }: ChatAreaProps) {
   return (
     <ScrollArea ref={scrollAreaRef} className="h-full">
       <div className="mx-auto max-w-3xl">
-        {messages.map((message) => (
-          <ChatMessage
-            key={message.id}
-            role={message.role}
-            content={message.content}
-            timestamp={message.timestamp}
-          />
-        ))}
+        {messages.map((message, index) => {
+          // Check if this is the last assistant message and we're streaming
+          const isLastMessage = index === messages.length - 1;
+          const isAssistantMessage = message.role === "assistant";
+          const isStreamingThisMessage =
+            isStreaming && isLastMessage && isAssistantMessage;
 
-        {/* Loading indicator */}
-        {isLoading && (
-          <div className="flex w-full gap-3 px-4 py-6">
-            <div className="flex max-w-[80%] flex-col gap-2">
-              <span className="text-xs font-semibold text-muted-foreground">
-                Assistant
-              </span>
-              <div className="rounded-2xl bg-muted px-4 py-3">
-                <div className="flex gap-1">
-                  <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
-                  <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
-                  <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground" />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+          return (
+            <ChatMessage
+              key={message.id}
+              role={message.role}
+              content={message.content}
+              timestamp={message.timestamp}
+              isStreaming={isStreamingThisMessage}
+            />
+          );
+        })}
 
         {/* Scroll anchor */}
         <div ref={bottomRef} />

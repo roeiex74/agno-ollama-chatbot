@@ -1,18 +1,20 @@
-import { useState, KeyboardEvent, useRef, useEffect } from "react";
-import { Send } from "lucide-react";
+import { useState, type KeyboardEvent, useRef, useEffect } from "react";
+import { Send, Square } from "lucide-react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
-  disabled?: boolean;
+  onCancelStream?: () => void;
+  isStreaming?: boolean;
   placeholder?: string;
 }
 
 export function ChatInput({
   onSendMessage,
-  disabled = false,
+  onCancelStream,
+  isStreaming = false,
   placeholder = "Message...",
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
@@ -31,7 +33,7 @@ export function ChatInput({
 
   const handleSend = () => {
     const trimmedMessage = message.trim();
-    if (trimmedMessage && !disabled) {
+    if (trimmedMessage && !isStreaming) {
       onSendMessage(trimmedMessage);
       setMessage("");
       // Reset textarea height
@@ -41,11 +43,21 @@ export function ChatInput({
     }
   };
 
+  const handleButtonClick = () => {
+    if (isStreaming && onCancelStream) {
+      onCancelStream();
+    } else {
+      handleSend();
+    }
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Send on Enter, new line on Shift+Enter
+    // Send on Enter (if not streaming), new line on Shift+Enter
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      if (!isStreaming) {
+        handleSend();
+      }
     }
   };
 
@@ -59,7 +71,7 @@ export function ChatInput({
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            disabled={disabled}
+            disabled={false}
             rows={1}
             className={cn(
               "min-h-[56px] max-h-[200px] resize-none",
@@ -69,12 +81,19 @@ export function ChatInput({
             )}
           />
           <Button
-            onClick={handleSend}
-            disabled={disabled || !message.trim()}
+            onClick={handleButtonClick}
+            disabled={!isStreaming && !message.trim()}
             size="icon"
-            className="absolute bottom-3 right-2 h-8 w-8 shrink-0 rounded-full cursor-pointer hover:opacity-90 transition-opacity"
+            className={cn(
+              "absolute bottom-3 right-4 h-8 w-8 shrink-0 rounded-full cursor-pointer hover:opacity-90 transition-all"
+              // isStreaming && "bg-destructive hover:bg-destructive"
+            )}
           >
-            <Send className="h-4 w-4" />
+            {isStreaming ? (
+              <Square className="h-4 w-4 fill-current" />
+            ) : (
+              <Send className="w-4 mr-[1px]" />
+            )}
           </Button>
         </div>
       </div>

@@ -14,7 +14,8 @@ interface ChatLayoutProps {
   onSelectConversation: (conversationId: string) => void;
   onNewConversation: () => void;
   onSendMessage: (message: string) => void;
-  isLoading?: boolean;
+  onCancelStream?: () => void;
+  isStreaming?: boolean;
 }
 
 export function ChatLayout({
@@ -23,7 +24,8 @@ export function ChatLayout({
   onSelectConversation,
   onNewConversation,
   onSendMessage,
-  isLoading = false,
+  onCancelStream,
+  isStreaming = false,
 }: ChatLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
@@ -108,13 +110,14 @@ export function ChatLayout({
 
         {/* Chat Area */}
         <div className="flex-1 overflow-hidden">
-          <ChatArea messages={currentMessages} isLoading={isLoading} />
+          <ChatArea messages={currentMessages} isStreaming={isStreaming} />
         </div>
 
         {/* Chat Input */}
         <ChatInput
           onSendMessage={onSendMessage}
-          disabled={isLoading}
+          onCancelStream={onCancelStream}
+          isStreaming={isStreaming}
           placeholder="Message..."
         />
       </main>

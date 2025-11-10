@@ -13,9 +13,15 @@ interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
   timestamp?: Date;
+  isStreaming?: boolean;
 }
 
-export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
+export function ChatMessage({
+  role,
+  content,
+  timestamp,
+  isStreaming = false,
+}: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -25,11 +31,12 @@ export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
   };
 
   const isUser = role === "user";
+  const showCopyButton = !isUser && !isStreaming && content.length > 0;
 
   return (
     <div
       className={cn(
-        "group flex w-full gap-3 px-4 py-6",
+        "group flex w-full gap-3 px-4 py-2",
         isUser ? "justify-end" : "justify-start"
       )}
     >
@@ -53,7 +60,16 @@ export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
               : "text-foreground"
           )}
         >
-          <div className="whitespace-pre-wrap break-words">{content}</div>
+          {!content && isStreaming ? (
+            // Show "Thinking..." when streaming but no content yet
+            <div className="animate-pulse">
+              <span className="bg-gradient-to-r from-muted-foreground via-foreground to-muted-foreground bg-[length:200%_auto] animate-[shimmer_2s_linear_infinite] bg-clip-text text-transparent">
+                Thinking...
+              </span>
+            </div>
+          ) : (
+            <div className="whitespace-pre-wrap break-words">{content}</div>
+          )}
         </div>
 
         {/* Footer with timestamp and copy button */}
@@ -68,15 +84,15 @@ export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
             </span>
           )} */}
 
-          {/* Copy button - only for assistant messages */}
-          {!isUser && (
+          {/* Copy button - only for assistant messages after streaming completes */}
+          {showCopyButton && (
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 w-6 p-0 transition-all cursor-pointer"
+                    className="h-6 w-6 p-0 transition-all cursor-pointer animate-in fade-in duration-300"
                     onClick={handleCopy}
                   >
                     {copied ? (
