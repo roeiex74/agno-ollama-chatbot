@@ -19,10 +19,6 @@ wheels/
 .installed.cfg
 *.egg
 
-# Python lib directory (not frontend/src/lib)
-/lib/
-backend/lib/
-
 # Virtual environments
 venv/
 ENV/
@@ -44,9 +40,6 @@ htmlcov/
 *.sqlite
 *.sqlite3
 *.db
-
-# Backend data directory (not frontend/src/data)
-/data/
 backend/data/
 
 # IDE
