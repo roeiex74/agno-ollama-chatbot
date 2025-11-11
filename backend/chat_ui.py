@@ -347,7 +347,7 @@ def main():
                 <div class="metric-card">
                     <strong>Model:</strong> {health_info.get('model', 'Unknown')}<br/>
                     <strong>Environment:</strong> {health_info.get('environment', 'Unknown')}<br/>
-                    <strong>Memory:</strong> {health_info.get('memory_backend', 'Unknown')}
+                    <strong>Database:</strong> {health_info.get('database', 'Unknown')}
                 </div>
                 """,
                 unsafe_allow_html=True,
