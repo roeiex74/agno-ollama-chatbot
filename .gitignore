@@ -10,7 +10,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -19,6 +18,10 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Python lib directory (not frontend/src/lib)
+/lib/
+backend/lib/
 
 # Virtual environments
 venv/
@@ -41,7 +44,10 @@ htmlcov/
 *.sqlite
 *.sqlite3
 *.db
-data/
+
+# Backend data directory (not frontend/src/data)
+/data/
+backend/data/
 
 # IDE
 .vscode/
