@@ -28,7 +28,7 @@ function ChatView() {
   const { data: conversationSummaries } = useGetConversationsQuery();
 
   // Use lazy query to manually trigger conversation fetching
-  const [fetchConversation, { data: conversationDetail }] = useLazyGetConversationQuery();
+  const [fetchConversation] = useLazyGetConversationQuery();
 
   // Load conversations into Redux when they arrive from the backend
   useEffect(() => {
