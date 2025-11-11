@@ -8,7 +8,6 @@ import {
   setCurrentConversation,
   addConversation,
   setConversations,
-  clearCurrentConversationMessages,
   addMessage,
 } from "./store/slices/conversationsSlice";
 import { selectIsStreaming } from "./store/slices/uiSlice";
@@ -49,35 +48,43 @@ function ChatView() {
   // Fetch conversation when currentConversationId changes
   useEffect(() => {
     if (currentConversationId) {
-      setIsLoadingConversation(true);
-      // Clear current messages immediately
-      dispatch(clearCurrentConversationMessages(currentConversationId));
-      // Fetch fresh data from server
-      fetchConversation(currentConversationId)
-        .unwrap()
-        .then((detail) => {
-          // Convert backend messages to frontend format (use timestamps)
-          const messages = detail.messages.map((msg, index) => ({
-            id: `${currentConversationId}-${index}-${Date.now()}`,
-            role: msg.role,
-            content: msg.content,
-            timestamp: Date.now(), // Use number timestamp instead of Date object
-          }));
+      // Check if this conversation already has messages (newly created)
+      const conversation = conversations.find(c => c.id === currentConversationId);
 
-          // Update the conversation with loaded messages
-          messages.forEach((message) => {
-            dispatch(addMessage({ conversationId: currentConversationId, message }));
+      // Only fetch from backend if conversation has no messages
+      // (This prevents clearing messages for newly created conversations)
+      if (conversation && conversation.messages.length === 0) {
+        setIsLoadingConversation(true);
+        // Fetch fresh data from server
+        fetchConversation(currentConversationId)
+          .unwrap()
+          .then((detail) => {
+            // Convert backend messages to frontend format (use timestamps)
+            const messages = detail.messages.map((msg, index) => ({
+              id: `${currentConversationId}-${index}-${Date.now()}`,
+              role: msg.role,
+              content: msg.content,
+              timestamp: Date.now(), // Use number timestamp instead of Date object
+            }));
+
+            // Update the conversation with loaded messages
+            messages.forEach((message) => {
+              dispatch(addMessage({ conversationId: currentConversationId, message }));
+            });
+
+            setIsLoadingConversation(false);
+          })
+          .catch(() => {
+            // Conversation doesn't exist on backend yet (newly created)
+            setIsLoadingConversation(false);
           });
-
-          setIsLoadingConversation(false);
-        })
-        .catch(() => {
-          setIsLoadingConversation(false);
-        });
+      } else {
+        setIsLoadingConversation(false);
+      }
     } else {
       setIsLoadingConversation(false);
     }
-  }, [currentConversationId, dispatch, fetchConversation]); // Removed 'conversations' dependency
+  }, [currentConversationId, dispatch, fetchConversation, conversations]); // Added conversations back as dependency
 
   const { sendStreamingMessage, cancelStream } = useStreamingChat();
 
@@ -85,6 +92,9 @@ function ChatView() {
   useEffect(() => {
     if (conversationId && conversationId !== currentConversationId) {
       dispatch(setCurrentConversation(conversationId));
+    } else if (!conversationId && currentConversationId !== null) {
+      // If we're at home (no conversationId in URL) and there's a current conversation, clear it
+      dispatch(setCurrentConversation(null));
     }
   }, [conversationId, currentConversationId, dispatch]);
 
@@ -94,9 +104,9 @@ function ChatView() {
   };
 
   const handleNewConversation = () => {
-    // Clear current conversation first
+    // Clear current conversation
     dispatch(setCurrentConversation(null));
-    // Then navigate - this ensures state is cleared before navigation
+    // Navigate to home - use key to force remount if already at home
     navigate("/", { replace: true });
   };
 
