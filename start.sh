@@ -1,5 +1,5 @@
 #!/bin/bash
-# set -e
+set -e
 
 #############################################
 # Agno Ollama Chatbot - Full Stack Launcher
@@ -90,7 +90,7 @@ cd "$ROOT/frontend"
 [ -f ".env" ] || log_error ".env not found. Copy: cp frontend/.env.example frontend/.env"
 
 log_info "Installing npm packages..."
-npm install --silent --legacy-peer-deps 2>/dev/null
+npm install --silent --legacy-peer-deps 2>/dev/null || npm install --legacy-peer-deps
 log_success "Frontend ready"
 
 #############################################
