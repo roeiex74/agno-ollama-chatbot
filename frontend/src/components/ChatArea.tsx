@@ -49,7 +49,7 @@ export function ChatArea({ messages, isStreaming = false }: ChatAreaProps) {
               key={message.id}
               role={message.role}
               content={message.content}
-              timestamp={message.timestamp}
+              timestamp={new Date(message.timestamp)}
               isStreaming={isStreamingThisMessage}
             />
           );

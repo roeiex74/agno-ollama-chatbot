@@ -19,7 +19,7 @@ interface ChatMessageProps {
 export function ChatMessage({
   role,
   content,
-  timestamp,
+  timestamp: _timestamp,
   isStreaming = false,
 }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);

@@ -38,7 +38,7 @@ export const conversationsApi = createApi({
     // Get single conversation with full history
     getConversation: builder.query<ConversationDetail, string>({
       query: (conversationId) => `/conversations/${conversationId}`,
-      providesTags: (result, error, conversationId) => [
+      providesTags: (_result, _error, conversationId) => [
         { type: "Conversation", id: conversationId },
       ],
     }),
@@ -62,7 +62,7 @@ export const conversationsApi = createApi({
         method: "PATCH",
         body: { title },
       }),
-      invalidatesTags: (result, error, { conversationId }) => [
+      invalidatesTags: (_result, _error, { conversationId }) => [
         "Conversations",
         { type: "Conversation", id: conversationId },
       ],

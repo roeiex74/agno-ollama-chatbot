@@ -38,7 +38,7 @@ class TestServerHealth:
             "status": "ok",
             "environment": "local",
             "model": "llama3.2:3b",
-            "memory_backend": "sqlite",
+            "database": "postgresql",
         }
         mock_get.return_value = mock_response
 

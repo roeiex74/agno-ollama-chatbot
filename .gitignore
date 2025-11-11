@@ -10,7 +10,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -32,6 +31,7 @@ backend/venv/
 .coverage
 htmlcov/
 .tox/
+coverage/
 
 # Environment
 .env
@@ -41,7 +41,7 @@ htmlcov/
 *.sqlite
 *.sqlite3
 *.db
-data/
+backend/data/
 
 # IDE
 .vscode/

@@ -11,6 +11,7 @@ class Environment(str, Enum):
 
     LOCAL = "local"
     PROD = "prod"
+    TEST = "test"
 
 
 class Settings(BaseSettings):
