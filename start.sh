@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -e -o pipefail
 
 #############################################
 # Agno Ollama Chatbot - Full Stack Launcher
@@ -22,6 +22,7 @@ BACKEND_PID="" FRONTEND_PID="" OLLAMA_PID=""
 log_info() { echo -e "${B}[INFO]${NC} $1"; }
 log_success() { echo -e "${G}✓${NC} $1"; }
 log_error() { echo -e "${R}✗${NC} $1"; exit 1; }
+log_warning() { echo -e "${Y}⚠${NC} $1"; }
 log_section() { echo -e "\n${C}$1${NC}\n"; }
 
 # Cleanup on exit
@@ -71,8 +72,20 @@ log_success "Python $PY_VER, Node $(node --version), Ollama $(ollama --version 2
 log_section "Setting Up Backend"
 cd "$ROOT/backend"
 
-[ -f ".env" ] || log_error ".env not found. Copy: cp backend/.env.example backend/.env"
-grep -q "POSTGRES_URL=" .env || log_error "POSTGRES_URL missing in .env"
+if [ ! -f ".env" ]; then
+    log_warning "Backend .env file not found!"
+    echo -e "${Y}Please retrieve the .env file from the Moodle and place it in: backend/.env${NC}"
+    echo -e "${R}Cannot continue without .env file. Exiting...${NC}\n"
+    trap - SIGINT SIGTERM EXIT  # Disable cleanup trap to avoid extra messages
+    exit 0  # Exit gracefully without killing terminal
+fi
+
+if ! grep -q "POSTGRES_URL=" .env 2>/dev/null; then
+    log_warning "POSTGRES_URL missing in .env"
+    echo -e "${Y}Please ensure your .env file contains POSTGRES_URL configuration${NC}\n"
+    trap - SIGINT SIGTERM EXIT
+    exit 0
+fi
 
 [ -d "venv" ] || { log_info "Creating venv..."; python3 -m venv venv; }
 source venv/bin/activate
@@ -87,7 +100,13 @@ log_success "Backend ready"
 log_section "Setting Up Frontend"
 cd "$ROOT/frontend"
 
-[ -f ".env" ] || log_error ".env not found. Copy: cp frontend/.env.example frontend/.env"
+if [ ! -f ".env" ]; then
+    log_warning "Frontend .env file not found!"
+    echo -e "${Y}Please retrieve the .env file from the Moodle and place it in: frontend/.env${NC}"
+    echo -e "${R}Cannot continue without .env file. Exiting...${NC}\n"
+    trap - SIGINT SIGTERM EXIT
+    exit 0
+fi
 
 log_info "Installing npm packages..."
 npm install --silent --legacy-peer-deps 2>/dev/null || npm install --legacy-peer-deps
