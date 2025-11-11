@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e -o pipefail
+set -o pipefail
 
 #############################################
 # Agno Ollama Chatbot - Full Stack Launcher
@@ -21,7 +21,13 @@ BACKEND_PID="" FRONTEND_PID="" OLLAMA_PID=""
 # Logging
 log_info() { echo -e "${B}[INFO]${NC} $1"; }
 log_success() { echo -e "${G}✓${NC} $1"; }
-log_error() { echo -e "${R}✗${NC} $1"; exit 1; }
+log_error() {
+    echo -e "${R}✗ ERROR:${NC} $1"
+    echo -e "${Y}The script encountered an error but your terminal will remain open.${NC}"
+    echo -e "${Y}Please fix the issue above and try again.${NC}\n"
+    trap - SIGINT SIGTERM EXIT  # Disable cleanup to avoid extra messages
+    exit 0  # Exit gracefully without killing terminal
+}
 log_warning() { echo -e "${Y}⚠${NC} $1"; }
 log_section() { echo -e "\n${C}$1${NC}\n"; }
 
