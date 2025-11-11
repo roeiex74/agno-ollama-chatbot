@@ -1,5 +1,4 @@
 #!/bin/bash
-set -o pipefail
 
 #############################################
 # Agno Ollama Chatbot - Full Stack Launcher
@@ -25,8 +24,8 @@ log_error() {
     echo -e "${R}✗ ERROR:${NC} $1"
     echo -e "${Y}The script encountered an error but your terminal will remain open.${NC}"
     echo -e "${Y}Please fix the issue above and try again.${NC}\n"
-    trap - SIGINT SIGTERM EXIT  # Disable cleanup to avoid extra messages
-    exit 0  # Exit gracefully without killing terminal
+    cleanup  # Clean up any running processes
+    return 1  # Return from main function
 }
 log_warning() { echo -e "${Y}⚠${NC} $1"; }
 log_section() { echo -e "\n${C}$1${NC}\n"; }
@@ -38,9 +37,12 @@ cleanup() {
     [ -n "$BACKEND_PID" ] && kill "$BACKEND_PID" 2>/dev/null || true
     [ -n "$OLLAMA_PID" ] && kill "$OLLAMA_PID" 2>/dev/null || true
     log_success "Services stopped"
-    exit 0
 }
-trap cleanup SIGINT SIGTERM EXIT
+trap cleanup SIGINT SIGTERM
+
+# Main function to allow return instead of exit
+main() {
+set -o pipefail
 
 # Check command exists
 check_cmd() {
@@ -82,15 +84,13 @@ if [ ! -f ".env" ]; then
     log_warning "Backend .env file not found!"
     echo -e "${Y}Please retrieve the .env file from the Moodle and place it in: backend/.env${NC}"
     echo -e "${R}Cannot continue without .env file. Exiting...${NC}\n"
-    trap - SIGINT SIGTERM EXIT  # Disable cleanup trap to avoid extra messages
-    exit 0  # Exit gracefully without killing terminal
+    return 1
 fi
 
 if ! grep -q "POSTGRES_URL=" .env 2>/dev/null; then
     log_warning "POSTGRES_URL missing in .env"
     echo -e "${Y}Please ensure your .env file contains POSTGRES_URL configuration${NC}\n"
-    trap - SIGINT SIGTERM EXIT
-    exit 0
+    return 1
 fi
 
 [ -d "venv" ] || { log_info "Creating venv..."; python3 -m venv venv; }
@@ -110,8 +110,7 @@ if [ ! -f ".env" ]; then
     log_warning "Frontend .env file not found!"
     echo -e "${Y}Please retrieve the .env file from the Moodle and place it in: frontend/.env${NC}"
     echo -e "${R}Cannot continue without .env file. Exiting...${NC}\n"
-    trap - SIGINT SIGTERM EXIT
-    exit 0
+    return 1
 fi
 
 log_info "Installing npm packages..."
@@ -173,3 +172,7 @@ echo -e "${B}Logs:${NC}     $LOGS_DIR"
 echo -e "\n${Y}Press Ctrl+C to stop all services${NC}\n"
 
 wait
+}
+
+# Run main function
+main
