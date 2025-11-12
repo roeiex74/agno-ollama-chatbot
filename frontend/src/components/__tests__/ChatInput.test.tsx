@@ -338,7 +338,6 @@ describe('ChatInput Component', () => {
 
   describe('Edge Cases', () => {
     it('handles very long input', async () => {
-      const user = userEvent.setup();
       render(<ChatInput onSendMessage={mockOnSendMessage} />);
 
       const longText = 'a'.repeat(5000);

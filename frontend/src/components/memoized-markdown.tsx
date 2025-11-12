@@ -19,7 +19,8 @@ const MemoizedMarkdownBlock = memo(
         rehypePlugins={[rehypeHighlight]}
         components={{
           // Inline code
-          code: ({ node, inline, className, children, ...props }: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          code: ({ node: _node, inline, className, children, ...props }: any) => {
             if (inline) {
               return (
                 <code
@@ -41,7 +42,8 @@ const MemoizedMarkdownBlock = memo(
             );
           },
           // Links
-          a: ({ node, ...props }: any) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          a: ({ node: _node, ...props }: any) => (
             <a
               className="text-primary underline underline-offset-4 hover:text-primary/80"
               target="_blank"
@@ -50,28 +52,35 @@ const MemoizedMarkdownBlock = memo(
             />
           ),
           // Lists
-          ul: ({ node, ...props }: any) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ul: ({ node: _node, ...props }: any) => (
             <ul className="list-disc list-outside ml-4 space-y-1 my-2" {...props} />
           ),
-          ol: ({ node, ...props }: any) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ol: ({ node: _node, ...props }: any) => (
             <ol className="list-decimal list-outside ml-4 space-y-1 my-2" {...props} />
           ),
           // Paragraphs
-          p: ({ node, ...props }: any) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          p: ({ node: _node, ...props }: any) => (
             <p className="mb-2 last:mb-0" {...props} />
           ),
           // Headings
-          h1: ({ node, ...props }: any) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          h1: ({ node: _node, ...props }: any) => (
             <h1 className="text-xl font-bold mt-4 mb-2 first:mt-0" {...props} />
           ),
-          h2: ({ node, ...props }: any) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          h2: ({ node: _node, ...props }: any) => (
             <h2 className="text-lg font-bold mt-3 mb-2 first:mt-0" {...props} />
           ),
-          h3: ({ node, ...props }: any) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          h3: ({ node: _node, ...props }: any) => (
             <h3 className="text-base font-bold mt-2 mb-1 first:mt-0" {...props} />
           ),
           // Blockquotes
-          blockquote: ({ node, ...props }: any) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          blockquote: ({ node: _node, ...props }: any) => (
             <blockquote
               className="border-l-4 border-muted-foreground/30 pl-4 italic my-2"
               {...props}

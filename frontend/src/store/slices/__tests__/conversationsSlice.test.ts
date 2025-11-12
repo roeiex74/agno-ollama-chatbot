@@ -321,6 +321,7 @@ describe('conversationsSlice - Additional Tests', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = selectCurrentConversationId(state as any);
       expect(result).toBeNull();
     });
@@ -341,6 +342,7 @@ describe('conversationsSlice - Additional Tests', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = selectCurrentConversation(state as any);
       expect(result).toBeNull();
     });
@@ -368,6 +370,7 @@ describe('conversationsSlice - Additional Tests', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = selectCurrentConversation(state as any);
       expect(result?.id).toBe('conv-2');
       expect(result?.title).toBe('Second');
@@ -405,6 +408,7 @@ describe('conversationsSlice - Additional Tests', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = selectAllConversations(state as any);
       expect(result.length).toBe(3);
       expect(result).toEqual(conversations);
@@ -418,6 +422,7 @@ describe('conversationsSlice - Additional Tests', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = selectAllConversations(state as any);
       expect(result).toEqual([]);
     });
@@ -608,8 +613,6 @@ describe('conversationsSlice - Additional Tests', () => {
         ],
         currentConversationId: null,
       };
-
-      const originalMessagesLength = originalState.conversations[0].messages.length;
 
       const newState = conversationsReducer(
         originalState,
