@@ -8,9 +8,7 @@ on:
       - ".github/workflows/backend-tests.yml"
   pull_request:
     branches: ["main", "master"]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-tests.yml"
+    # Removed path filters - backend tests will run on all PRs
 
 jobs:
   test:
