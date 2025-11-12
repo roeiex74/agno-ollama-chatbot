@@ -93,7 +93,6 @@ A self-hosted chatbot application combining:
 - **FR-4.2**: System renders markdown with GitHub Flavored Markdown support
 - **FR-4.3**: Code blocks display syntax highlighting for multiple languages
 - **FR-4.4**: System filters system messages from user display
-- **FR-4.5**: Messages display relative timestamps ("5 min ago", "2 hr ago")
 
 ### 4.2 Backend API Endpoints
 
