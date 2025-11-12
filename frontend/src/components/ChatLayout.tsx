@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, PanelLeft, PanelLeftOpen } from "lucide-react";
+import { Menu, PanelLeft, PanelLeftOpen, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { ConversationList } from "./ConversationList";
@@ -91,7 +91,11 @@ export function ChatLayout({
           {/* Mobile sidebar toggle */}
           <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden cursor-pointer hover:bg-accent transition-colors">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden cursor-pointer hover:bg-accent transition-colors"
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -107,15 +111,18 @@ export function ChatLayout({
 
           {/* Current conversation title */}
           <h1 className="flex-1 truncate text-lg font-semibold">
-            {currentConversation?.title || "ChatGPT"}
+            {currentConversation?.title || "GPT Agent"}
           </h1>
         </header>
 
         {/* Chat Area */}
         <div className="flex-1 overflow-hidden">
           {isLoadingConversation ? (
-            <div className="flex h-full items-center justify-center">
-              <div className="text-muted-foreground">Loading conversation...</div>
+            <div className="flex h-full flex-col items-center justify-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <div className="text-sm text-muted-foreground">
+                Loading conversation...
+              </div>
             </div>
           ) : (
             <ChatArea messages={currentMessages} isStreaming={isStreaming} />

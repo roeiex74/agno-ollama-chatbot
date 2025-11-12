@@ -36,6 +36,9 @@ export const conversationsApi = createApi({
   reducerPath: "conversationsApi",
   baseQuery: fetchBaseQuery({ baseUrl: API_CONFIG.BASE_URL }),
   tagTypes: ["Conversations", "Conversation"],
+  // Disable automatic refetching to prevent conversations from jumping around
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
   endpoints: (builder) => ({
     // List all conversations
     getConversations: builder.query<ConversationSummary[], void>({
@@ -70,8 +73,9 @@ export const conversationsApi = createApi({
         method: "PATCH",
         body: { title },
       }),
+      // Only invalidate the specific conversation, not the entire list
+      // This prevents unnecessary refetches that change conversation order
       invalidatesTags: (_result, _error, { conversationId }) => [
-        "Conversations",
         { type: "Conversation", id: conversationId },
       ],
     }),

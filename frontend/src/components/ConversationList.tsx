@@ -3,9 +3,23 @@ import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { Conversation } from "@/data/conversations";
-import { groupConversationsByDate, getNonEmptyGroups, GROUP_LABELS } from "@/utils/dateGrouping";
+import {
+  groupConversationsByDate,
+  getNonEmptyGroups,
+  GROUP_LABELS,
+} from "@/utils/dateGrouping";
 import { useState } from "react";
 import { useDeleteConversationMutation } from "@/store/api/conversationsApi";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -21,17 +35,28 @@ export function ConversationList({
   onNewConversation,
 }: ConversationListProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [conversationToDelete, setConversationToDelete] = useState<
+    string | null
+  >(null);
   const [deleteConversation] = useDeleteConversationMutation();
 
   // Group conversations by date
   const groupedConversations = groupConversationsByDate(conversations);
   const nonEmptyGroups = getNonEmptyGroups(groupedConversations);
 
-  const handleDelete = async (e: React.MouseEvent, conversationId: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, conversationId: string) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this conversation?")) {
+    setConversationToDelete(conversationId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (conversationToDelete) {
       try {
-        await deleteConversation(conversationId).unwrap();
+        await deleteConversation(conversationToDelete).unwrap();
+        setDeleteDialogOpen(false);
+        setConversationToDelete(null);
       } catch (error) {
         console.error("Failed to delete conversation:", error);
       }
@@ -99,34 +124,27 @@ export function ConversationList({
                         )}
                       >
                         <div className="min-w-0 flex-1">
-                          <p
-                            className={cn(
-                              "truncate text-sm",
-                              currentConversationId === conversation.id
-                                ? "font-semibold"
-                                : "font-medium"
-                            )}
-                          >
+                          <p className="truncate text-sm font-medium">
                             {conversation.title}
                           </p>
                         </div>
 
-                        {/* Delete button - shows on hover */}
-                        {hoveredId === conversation.id && (
-                          <button
-                            onClick={(e) => handleDelete(e, conversation.id)}
-                            className={cn(
-                              "opacity-0 group-hover:opacity-100",
-                              "transition-opacity duration-200",
-                              "p-1.5 rounded-md",
-                              "hover:bg-destructive/10 hover:text-destructive",
-                              "cursor-pointer"
-                            )}
-                            title="Delete conversation"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        )}
+                        {/* Delete button - always rendered but invisible when not hovering */}
+                        <button
+                          onClick={(e) => handleDeleteClick(e, conversation.id)}
+                          className={cn(
+                            "p-1.5 rounded-md",
+                            "transition-opacity duration-200",
+                            "hover:bg-destructive/10 hover:text-destructive",
+                            "cursor-pointer",
+                            hoveredId === conversation.id
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                          title="Delete conversation"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       </button>
                     </div>
                   ))}
@@ -136,6 +154,36 @@ export function ConversationList({
           </div>
         )}
       </ScrollArea>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete chat?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete{" "}
+              <span className="font-semibold">
+                {conversationToDelete
+                  ? conversations.find((c) => c.id === conversationToDelete)
+                      ?.title
+                  : ""}
+              </span>
+              .
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="cursor-pointer bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

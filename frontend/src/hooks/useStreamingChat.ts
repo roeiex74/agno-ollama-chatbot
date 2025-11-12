@@ -37,27 +37,26 @@ export function useStreamingChat() {
       // Generate title immediately if this is a new conversation
       const conversation = conversations.find((c) => c.id === conversationId);
       if (conversation && conversation.title === "New Chat") {
-        // Call AI title generation endpoint immediately
+        // Call AI title generation endpoint immediately (runs in parallel with chat)
         generateTitle({ message })
           .unwrap()
           .then((response) => {
-            // Update title in backend
-            return updateTitle({ conversationId, title: response.title });
+            const generatedTitle = response.title;
+            // Update title in Redux immediately for instant feedback
+            dispatch(updateConversationTitle({ conversationId, title: generatedTitle }));
+            // Also update in backend
+            return updateTitle({ conversationId, title: generatedTitle });
           })
           .then(() => {
-            // Update title in Redux after successful backend update
-            // Note: The title from the first .then() is not accessible here,
-            // so we'll rely on the backend update triggering a refetch
+            console.log("Title updated successfully in backend");
           })
           .catch((error) => {
             console.error("Failed to generate or update title:", error);
             // Fallback: use first 20 chars
             const fallbackTitle = message.slice(0, 20) + (message.length > 20 ? "..." : "");
+            dispatch(updateConversationTitle({ conversationId, title: fallbackTitle }));
             updateTitle({ conversationId, title: fallbackTitle })
               .unwrap()
-              .then(() => {
-                dispatch(updateConversationTitle({ conversationId, title: fallbackTitle }));
-              })
               .catch((err) => {
                 console.error("Failed to update fallback title:", err);
               });
