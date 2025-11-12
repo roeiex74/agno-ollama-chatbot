@@ -33,10 +33,11 @@ log_section() { echo -e "\n${C}$1${NC}\n"; }
 # Cleanup on exit
 cleanup() {
     echo -e "\n${B}Shutting down...${NC}"
-    [ -n "$FRONTEND_PID" ] && kill "$FRONTEND_PID" 2>/dev/null || true
-    [ -n "$BACKEND_PID" ] && kill "$BACKEND_PID" 2>/dev/null || true
-    [ -n "$OLLAMA_PID" ] && kill "$OLLAMA_PID" 2>/dev/null || true
+    [ -n "$FRONTEND_PID" ] && kill "$FRONTEND_PID" 2>/dev/null && wait "$FRONTEND_PID" 2>/dev/null || true
+    [ -n "$BACKEND_PID" ] && kill "$BACKEND_PID" 2>/dev/null && wait "$BACKEND_PID" 2>/dev/null || true
+    [ -n "$OLLAMA_PID" ] && kill "$OLLAMA_PID" 2>/dev/null && wait "$OLLAMA_PID" 2>/dev/null || true
     log_success "Services stopped"
+    exit 0
 }
 trap cleanup SIGINT SIGTERM
 
