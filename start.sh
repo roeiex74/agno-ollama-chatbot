@@ -108,10 +108,16 @@ log_section "Setting Up Frontend"
 cd "$ROOT/frontend"
 
 if [ ! -f ".env" ]; then
-    log_warning "Frontend .env file not found!"
-    echo -e "${Y}Please retrieve the .env file from the Moodle and place it in: frontend/.env${NC}"
-    echo -e "${R}Cannot continue without .env file. Exiting...${NC}\n"
-    return 1
+    if [ -f ".env.example" ]; then
+        log_info "Creating .env from .env.example..."
+        cp .env.example .env
+        log_success "Frontend .env created"
+    else
+        log_warning "Frontend .env and .env.example not found!"
+        echo -e "${Y}Please retrieve the .env file from the Moodle and place it in: frontend/.env${NC}"
+        echo -e "${R}Cannot continue without .env file. Exiting...${NC}\n"
+        return 1
+    fi
 fi
 
 log_info "Installing npm packages..."
