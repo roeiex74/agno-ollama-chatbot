@@ -32,6 +32,7 @@ A production-ready, full-stack chatbot application powered by **Agno** (agent fr
 ## ✨ Features
 
 ### Core Functionality
+
 - 💬 **Real-time Streaming Chat**: Server-Sent Events (SSE) for token-by-token streaming responses
 - 🔄 **Conversation Management**: Full CRUD operations (create, read, update, delete) for chat conversations
 - 💾 **Persistent Storage**: PostgreSQL database integration via Neon for reliable conversation history
@@ -40,6 +41,7 @@ A production-ready, full-stack chatbot application powered by **Agno** (agent fr
 - 🎨 **Auto-Title Generation**: Conversations automatically titled from first user message
 
 ### User Experience
+
 - 🎭 **Modern UI**: ChatGPT-inspired interface with dark mode support and smooth animations
 - ⚡ **Optimistic Updates**: Instant UI feedback with background synchronization
 - 📱 **Responsive Design**: Mobile-first design that works seamlessly on all screen sizes
@@ -53,6 +55,7 @@ A production-ready, full-stack chatbot application powered by **Agno** (agent fr
 - 📋 **Copy Functionality**: One-click copy button for assistant messages
 
 ### Technical Features
+
 - 🏗️ **Type-Safe**: Full TypeScript implementation on frontend with strict type checking
 - 🔐 **Error Handling**: Comprehensive error boundaries and user-friendly error messages
 - 🎛️ **State Management**: Redux Toolkit with RTK Query for efficient data fetching and caching
@@ -126,6 +129,7 @@ A production-ready, full-stack chatbot application powered by **Agno** (agent fr
 ### Data Flow Diagrams
 
 #### 1. Chat Message Flow (Streaming)
+
 ```
 User Types Message
         │
@@ -189,6 +193,7 @@ User Types Message
 ```
 
 #### 2. Conversation Loading Flow
+
 ```
 App Loads
     │
@@ -269,6 +274,7 @@ User Clicks Conversation
 ```
 
 #### 3. Title Auto-Save Flow
+
 ```
 First Message Sent
         │
@@ -321,49 +327,53 @@ First Message Sent
 ## 🛠️ Tech Stack
 
 ### Backend Stack
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| **[FastAPI](https://fastapi.tiangolo.com/)** | 0.115+ | Modern, fast web framework with automatic API docs |
-| **[Agno](https://agno.com/)** | Latest | AI agent orchestration with native PostgreSQL support |
-| **[Ollama](https://ollama.com/)** | Latest | Local LLM inference engine (privacy-first) |
-| **[PostgreSQL](https://www.postgresql.org/)** | 16+ | Robust relational database |
-| **[Neon](https://neon.tech/)** | - | Serverless PostgreSQL platform |
-| **[psycopg](https://www.psycopg.org/)** | 3.x | PostgreSQL adapter for Python (async support) |
-| **[Pydantic](https://pydantic.dev/)** | 2.x | Data validation using Python type annotations |
-| **[Uvicorn](https://www.uvicorn.org/)** | Latest | Lightning-fast ASGI server |
+
+| Technology                                    | Version | Purpose                                               |
+| --------------------------------------------- | ------- | ----------------------------------------------------- |
+| **[FastAPI](https://fastapi.tiangolo.com/)**  | 0.115+  | Modern, fast web framework with automatic API docs    |
+| **[Agno](https://agno.com/)**                 | Latest  | AI agent orchestration with native PostgreSQL support |
+| **[Ollama](https://ollama.com/)**             | Latest  | Local LLM inference engine (privacy-first)            |
+| **[PostgreSQL](https://www.postgresql.org/)** | 16+     | Robust relational database                            |
+| **[Neon](https://neon.tech/)**                | -       | Serverless PostgreSQL platform                        |
+| **[psycopg](https://www.psycopg.org/)**       | 3.x     | PostgreSQL adapter for Python (async support)         |
+| **[Pydantic](https://pydantic.dev/)**         | 2.x     | Data validation using Python type annotations         |
+| **[Uvicorn](https://www.uvicorn.org/)**       | Latest  | Lightning-fast ASGI server                            |
 
 ### Frontend Stack
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| **[React](https://react.dev/)** | 19+ | Component-based UI library |
-| **[TypeScript](https://www.typescriptlang.org/)** | 5.6+ | Type-safe JavaScript |
-| **[Vite](https://vitejs.dev/)** | 7.x | Next generation frontend tooling |
-| **[Redux Toolkit](https://redux-toolkit.js.org/)** | 2.x | Official Redux toolset (simplified) |
-| **[RTK Query](https://redux-toolkit.js.org/rtk-query/overview)** | - | Powerful data fetching & caching |
-| **[shadcn/ui](https://ui.shadcn.com/)** | Latest | Re-usable components (Radix UI based) |
-| **[Tailwind CSS](https://tailwindcss.com/)** | 4.x | Utility-first CSS framework |
-| **[Lucide React](https://lucide.dev/)** | Latest | Beautiful & consistent icon library |
-| **[React Router](https://reactrouter.com/)** | 7.x | Declarative routing for React |
-| **[React Markdown](https://github.com/remarkjs/react-markdown)** | 10.x | Markdown rendering with React components |
-| **[Marked](https://marked.js.org/)** | 17.x | Fast markdown parser for block-level parsing |
-| **[rehype-highlight](https://github.com/rehypejs/rehype-highlight)** | 7.x | Syntax highlighting for code blocks |
-| **[remark-gfm](https://github.com/remarkjs/remark-gfm)** | 4.x | GitHub Flavored Markdown support |
+
+| Technology                                                           | Version | Purpose                                      |
+| -------------------------------------------------------------------- | ------- | -------------------------------------------- |
+| **[React](https://react.dev/)**                                      | 19+     | Component-based UI library                   |
+| **[TypeScript](https://www.typescriptlang.org/)**                    | 5.6+    | Type-safe JavaScript                         |
+| **[Vite](https://vitejs.dev/)**                                      | 7.x     | Next generation frontend tooling             |
+| **[Redux Toolkit](https://redux-toolkit.js.org/)**                   | 2.x     | Official Redux toolset (simplified)          |
+| **[RTK Query](https://redux-toolkit.js.org/rtk-query/overview)**     | -       | Powerful data fetching & caching             |
+| **[shadcn/ui](https://ui.shadcn.com/)**                              | Latest  | Re-usable components (Radix UI based)        |
+| **[Tailwind CSS](https://tailwindcss.com/)**                         | 4.x     | Utility-first CSS framework                  |
+| **[Lucide React](https://lucide.dev/)**                              | Latest  | Beautiful & consistent icon library          |
+| **[React Router](https://reactrouter.com/)**                         | 7.x     | Declarative routing for React                |
+| **[React Markdown](https://github.com/remarkjs/react-markdown)**     | 10.x    | Markdown rendering with React components     |
+| **[Marked](https://marked.js.org/)**                                 | 17.x    | Fast markdown parser for block-level parsing |
+| **[rehype-highlight](https://github.com/rehypejs/rehype-highlight)** | 7.x     | Syntax highlighting for code blocks          |
+| **[remark-gfm](https://github.com/remarkjs/remark-gfm)**             | 4.x     | GitHub Flavored Markdown support             |
 
 ### DevOps & Development Tools
-| Tool | Purpose |
-|------|---------|
-| **Git / GitHub** | Version control & collaboration |
-| **npm** | Frontend package management |
-| **pip / venv** | Python package & environment management |
-| **ESLint** | JavaScript/TypeScript linting |
-| **Ruff** | Fast Python linter |
-| **pytest** | Python testing framework |
+
+| Tool             | Purpose                                 |
+| ---------------- | --------------------------------------- |
+| **Git / GitHub** | Version control & collaboration         |
+| **npm**          | Frontend package management             |
+| **pip / venv**   | Python package & environment management |
+| **ESLint**       | JavaScript/TypeScript linting           |
+| **Ruff**         | Fast Python linter                      |
+| **pytest**       | Python testing framework                |
 
 ## 📋 Prerequisites
 
 ### Required Software
 
 1. **Python 3.11 or higher**
+
    ```bash
    # Verify installation
    python --version  # Should show 3.11.x or higher
@@ -373,6 +383,7 @@ First Message Sent
    ```
 
 2. **Node.js 20+ and npm**
+
    ```bash
    # Verify installation
    node --version  # Should show v20.x.x or higher
@@ -382,6 +393,7 @@ First Message Sent
    Download from: https://nodejs.org/
 
 3. **Ollama** (Local LLM Runtime)
+
    ```bash
    # macOS (using Homebrew)
    brew install ollama
@@ -393,6 +405,7 @@ First Message Sent
    ```
 
    Verify installation:
+
    ```bash
    ollama --version
    ```
@@ -403,6 +416,7 @@ First Message Sent
    - Copy your connection string (looks like: `postgresql://user:pass@host/db`)
 
 ### Optional but Recommended
+
 - **Git** - For version control
 - **Docker** - For containerized deployment (future)
 - **Make** - Build automation (backend includes Makefile)
@@ -415,6 +429,7 @@ First Message Sent
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/roeiex74/agno-ollama-chatbot.git
 cd agno-ollama-chatbot
@@ -460,7 +475,7 @@ OLLAMA_HOST=http://localhost:11434
 MODEL_TIMEOUT_S=60
 
 # Database configuration (REPLACE WITH YOUR NEON CONNECTION STRING)
-POSTGRES_URL=postgresql+psycopg://user:password@host.region.aws.neon.tech/db?sslmode=require
+DATABASE_URL=postgresql+psycopg://user:password@host.region.aws.neon.tech/db?sslmode=require
 MAX_HISTORY=20
 
 # Server configuration
@@ -468,7 +483,7 @@ HOST=0.0.0.0
 PORT=8000
 ```
 
-**Important**: Replace the `POSTGRES_URL` with your actual Neon connection string!
+**Important**: Replace the `DATABASE_URL` with your actual Neon connection string!
 
 ### 4. Start Ollama and Download Model
 
@@ -499,17 +514,20 @@ make dev
 ```
 
 You should see:
+
 ```
 INFO:     Uvicorn running on http://0.0.0.0:8000
 INFO:     Application startup complete.
 ```
 
 **Verify backend is working**:
+
 ```bash
 curl http://localhost:8000/healthz
 ```
 
 Expected response:
+
 ```json
 {
   "status": "ok",
@@ -535,6 +553,7 @@ npm run dev
 ```
 
 You should see:
+
 ```
 VITE v6.0.x  ready in xxx ms
 
@@ -545,6 +564,7 @@ VITE v6.0.x  ready in xxx ms
 ### 7. Access the Application
 
 Open your browser and navigate to:
+
 ```
 http://localhost:5173
 ```
@@ -667,11 +687,13 @@ agno-ollama-chatbot/
 ### Key Files Explained
 
 #### Backend
+
 - **`app/main.py`**: FastAPI application with all HTTP endpoints and SSE streaming
 - **`app/config.py`**: Pydantic-based configuration loading from environment variables
 - **`app/agents/chatbot_agent.py`**: Agno agent wrapper with streaming and session management
 
 #### Frontend
+
 - **`src/App.tsx`**: Main application component with routing and top-level state
 - **`src/hooks/useStreamingChat.ts`**: Custom hook handling SSE streaming and message updates
 - **`src/store/api/conversationsApi.ts`**: RTK Query API for conversation CRUD operations and streaming helper
@@ -684,25 +706,27 @@ agno-ollama-chatbot/
 
 All backend configuration is managed through environment variables:
 
-| Variable | Default | Description | Example |
-|----------|---------|-------------|---------|
-| `ENV` | `local` | Environment type | `local`, `prod` |
-| `OLLAMA_MODEL` | `llama3.2:3b` | Ollama model identifier | `llama3.2:1b`, `llama3.3:70b`, `gpt-oss:20b` |
-| `OLLAMA_HOST` | `http://localhost:11434` | Ollama server URL | `http://localhost:11434` |
-| `MODEL_TIMEOUT_S` | `60` | Model request timeout (seconds) | `60`, `120` |
-| `POSTGRES_URL` | *Required* | PostgreSQL connection string | `postgresql+psycopg://user:pass@host/db` |
-| `MAX_HISTORY` | `20` | Max messages per conversation | `10`, `50`, `100` |
-| `HOST` | `0.0.0.0` | Server bind host | `0.0.0.0`, `127.0.0.1` |
-| `PORT` | `8000` | Server bind port | `8000`, `3000` |
+| Variable          | Default                  | Description                     | Example                                      |
+| ----------------- | ------------------------ | ------------------------------- | -------------------------------------------- |
+| `ENV`             | `local`                  | Environment type                | `local`, `prod`                              |
+| `OLLAMA_MODEL`    | `llama3.2:3b`            | Ollama model identifier         | `llama3.2:1b`, `llama3.3:70b`, `gpt-oss:20b` |
+| `OLLAMA_HOST`     | `http://localhost:11434` | Ollama server URL               | `http://localhost:11434`                     |
+| `MODEL_TIMEOUT_S` | `60`                     | Model request timeout (seconds) | `60`, `120`                                  |
+| `DATABASE_URL`    | _Required_               | PostgreSQL connection string    | `postgresql+psycopg://user:pass@host/db`     |
+| `MAX_HISTORY`     | `20`                     | Max messages per conversation   | `10`, `50`, `100`                            |
+| `HOST`            | `0.0.0.0`                | Server bind host                | `0.0.0.0`, `127.0.0.1`                       |
+| `PORT`            | `8000`                   | Server bind port                | `8000`, `3000`                               |
 
 **Switching Models:**
 
 Edit `.env`:
+
 ```bash
 OLLAMA_MODEL=llama3.3:70b
 ```
 
 Download the model:
+
 ```bash
 ollama pull llama3.3:70b
 ```
@@ -714,12 +738,14 @@ Restart the backend server.
 Frontend uses environment variables prefixed with `VITE_`:
 
 Create `frontend/.env.local`:
+
 ```bash
 # Optional: Override API URL (defaults to http://localhost:8000)
 VITE_API_URL=https://your-api-domain.com
 ```
 
 Configuration is accessed in `frontend/src/config/api.ts`:
+
 ```typescript
 export const API_CONFIG = {
   BASE_URL: import.meta.env.VITE_API_URL || "http://localhost:8000",
@@ -734,11 +760,13 @@ export const API_CONFIG = {
 ## 📡 API Documentation
 
 ### Base URL
+
 ```
 http://localhost:8000
 ```
 
 ### Authentication
+
 Currently no authentication required (add in production).
 
 ---
@@ -748,6 +776,7 @@ Currently no authentication required (add in production).
 Health check endpoint to verify server status.
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -758,6 +787,7 @@ Health check endpoint to verify server status.
 ```
 
 **Status Codes:**
+
 - `200 OK`: Server is healthy
 
 ---
@@ -767,14 +797,16 @@ Health check endpoint to verify server status.
 Send a chat message and receive a complete (non-streaming) response.
 
 **Request Body:**
+
 ```json
 {
   "message": "What is the capital of France?",
-  "conversation_id": "conv-123"  // Optional, auto-generated if omitted
+  "conversation_id": "conv-123" // Optional, auto-generated if omitted
 }
 ```
 
 **Response:**
+
 ```json
 {
   "conversation_id": "conv-123",
@@ -786,6 +818,7 @@ Send a chat message and receive a complete (non-streaming) response.
 ```
 
 **Status Codes:**
+
 - `200 OK`: Success
 - `503 Service Unavailable`: Agent not initialized
 - `500 Internal Server Error`: Processing error
@@ -797,10 +830,11 @@ Send a chat message and receive a complete (non-streaming) response.
 Send a chat message and receive a streaming (token-by-token) response via SSE.
 
 **Request Body:**
+
 ```json
 {
   "message": "Tell me a story",
-  "conversation_id": "conv-456"  // Optional
+  "conversation_id": "conv-456" // Optional
 }
 ```
 
@@ -821,16 +855,19 @@ data: {"done": true, "conversation_id": "conv-456", "response": "Once upon a tim
 ```
 
 **Event Format:**
+
 - Each line starts with `data: `
 - Each data payload is a JSON object
 - Delta events: `{"delta": "token"}`
 - Final event: `{"done": true, "conversation_id": "...", "response": "...", "usage": {...}}`
 
 **Headers:**
+
 - `Content-Type: application/json`
 - `Accept: text/event-stream`
 
 **Status Codes:**
+
 - `200 OK`: Stream started
 - `503 Service Unavailable`: Agent not initialized
 
@@ -841,6 +878,7 @@ data: {"done": true, "conversation_id": "conv-456", "response": "Once upon a tim
 List all conversations with summary information.
 
 **Response:**
+
 ```json
 [
   {
@@ -861,11 +899,13 @@ List all conversations with summary information.
 ```
 
 **Notes:**
+
 - System messages are excluded from `message_count`
 - Timestamps are in ISO 8601 format
 - Ordered by `updated_at` (most recent first)
 
 **Status Codes:**
+
 - `200 OK`: Success
 - `503 Service Unavailable`: Agent not initialized
 - `500 Internal Server Error`: Database error
@@ -877,9 +917,11 @@ List all conversations with summary information.
 Get a specific conversation with full message history.
 
 **URL Parameters:**
+
 - `conversation_id` (string): The conversation ID
 
 **Response:**
+
 ```json
 {
   "conversation_id": "conv-123",
@@ -908,10 +950,12 @@ Get a specific conversation with full message history.
 ```
 
 **Notes:**
+
 - System messages are filtered out from `messages` array
 - Only `user` and `assistant` messages are returned
 
 **Status Codes:**
+
 - `200 OK`: Success
 - `404 Not Found`: Conversation doesn't exist
 - `503 Service Unavailable`: Agent not initialized
@@ -924,9 +968,11 @@ Get a specific conversation with full message history.
 Delete a conversation permanently.
 
 **URL Parameters:**
+
 - `conversation_id` (string): The conversation ID to delete
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -935,6 +981,7 @@ Delete a conversation permanently.
 ```
 
 **Status Codes:**
+
 - `200 OK`: Successfully deleted
 - `503 Service Unavailable`: Agent not initialized
 - `500 Internal Server Error`: Deletion failed
@@ -946,9 +993,11 @@ Delete a conversation permanently.
 Update the title of a conversation.
 
 **URL Parameters:**
+
 - `conversation_id` (string): The conversation ID
 
 **Request Body:**
+
 ```json
 {
   "title": "My Important Conversation"
@@ -956,6 +1005,7 @@ Update the title of a conversation.
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -965,6 +1015,7 @@ Update the title of a conversation.
 ```
 
 **Status Codes:**
+
 - `200 OK`: Successfully updated
 - `404 Not Found`: Conversation doesn't exist
 - `503 Service Unavailable`: Agent not initialized
@@ -1032,6 +1083,7 @@ npm run preview
 #### Backend: Add a New Endpoint
 
 1. **Define Pydantic Models** in `app/main.py`:
+
    ```python
    class MyRequest(BaseModel):
        field: str
@@ -1041,6 +1093,7 @@ npm run preview
    ```
 
 2. **Add Endpoint**:
+
    ```python
    @app.post("/my-endpoint", response_model=MyResponse)
    async def my_endpoint(request: MyRequest) -> MyResponse:
@@ -1058,6 +1111,7 @@ npm run preview
 #### Frontend: Add a New Component
 
 1. **Create Component** in `src/components/`:
+
    ```typescript
    export function MyComponent({ prop }: { prop: string }) {
      return <div>{prop}</div>;
@@ -1065,36 +1119,38 @@ npm run preview
    ```
 
 2. **Add to Parent Component**:
+
    ```typescript
    import { MyComponent } from "./components/MyComponent";
 
-   <MyComponent prop="value" />
+   <MyComponent prop="value" />;
    ```
 
 3. **Style with Tailwind**:
    ```typescript
-   <div className="flex items-center gap-2 p-4 bg-gray-100">
-     ...
-   </div>
+   <div className="flex items-center gap-2 p-4 bg-gray-100">...</div>
    ```
 
 #### Adding Redux State
 
 1. **Update Slice** in `src/store/slices/`:
+
    ```typescript
    reducers: {
      myAction: (state, action: PayloadAction<string>) => {
        state.myField = action.payload;
-     }
+     };
    }
    ```
 
 2. **Export Action**:
+
    ```typescript
    export const { myAction } = mySlice.actions;
    ```
 
 3. **Use in Component**:
+
    ```typescript
    import { useAppDispatch } from "@/store/hooks";
    import { myAction } from "@/store/slices/mySlice";
@@ -1123,6 +1179,7 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for comprehensive development gui
 ### Backend Deployment Options
 
 **Option 1: Railway**
+
 ```bash
 # Install Railway CLI
 npm i -g @railway/cli
@@ -1134,6 +1191,7 @@ railway up
 ```
 
 **Option 2: Render**
+
 1. Connect GitHub repository
 2. Select "Web Service"
 3. Set build command: `pip install -r backend/requirements.txt`
@@ -1141,6 +1199,7 @@ railway up
 5. Add environment variables
 
 **Option 3: Fly.io**
+
 ```bash
 # Install Fly CLI
 curl -L https://fly.io/install.sh | sh
@@ -1153,6 +1212,7 @@ fly deploy
 ### Frontend Deployment Options
 
 **Option 1: Vercel (Recommended)**
+
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -1163,6 +1223,7 @@ vercel
 ```
 
 **Option 2: Netlify**
+
 ```bash
 # Build
 cd frontend
@@ -1174,6 +1235,7 @@ netlify deploy --prod
 ```
 
 **Option 3: Cloudflare Pages**
+
 1. Connect GitHub repository
 2. Set build command: `cd frontend && npm run build`
 3. Set publish directory: `frontend/dist`
@@ -1181,6 +1243,7 @@ netlify deploy --prod
 ### Database: Neon PostgreSQL
 
 Already configured for production use:
+
 - Serverless architecture
 - Auto-scaling
 - Automatic backups
@@ -1230,6 +1293,7 @@ npm test -- --coverage
 ### Manual Testing
 
 **Test Streaming:**
+
 ```bash
 curl -X POST http://localhost:8000/chat/stream \
   -H "Content-Type: application/json" \
@@ -1238,6 +1302,7 @@ curl -X POST http://localhost:8000/chat/stream \
 ```
 
 **Test Conversation Persistence:**
+
 ```bash
 # Send message
 curl -X POST http://localhost:8000/chat \
@@ -1256,10 +1321,13 @@ curl http://localhost:8000/conversations/test-123
 ### Common Backend Issues
 
 **Issue: Ollama connection failed**
+
 ```
 Error: Could not connect to Ollama at http://localhost:11434
 ```
+
 **Solution:**
+
 ```bash
 # Start Ollama service
 ollama serve
@@ -1271,11 +1339,14 @@ curl http://localhost:11434/api/version
 ---
 
 **Issue: Database connection error**
+
 ```
 Error: password authentication failed for user
 ```
+
 **Solution:**
-- Check `POSTGRES_URL` in `.env` is correct
+
+- Check `DATABASE_URL` in `.env` is correct
 - Verify password and hostname
 - Ensure `?sslmode=require` is in connection string
 - Test connection string with `psql`:
@@ -1286,10 +1357,13 @@ Error: password authentication failed for user
 ---
 
 **Issue: Model not found**
+
 ```
 Error: model 'llama3.2:3b' not found
 ```
+
 **Solution:**
+
 ```bash
 # Download the model
 ollama pull llama3.2:3b
@@ -1301,10 +1375,13 @@ ollama list
 ---
 
 **Issue: Port already in use**
+
 ```
 ERROR: [Errno 48] Address already in use
 ```
+
 **Solution:**
+
 ```bash
 # Find process using port 8000
 lsof -ti:8000
@@ -1319,10 +1396,13 @@ PORT=8001
 ### Common Frontend Issues
 
 **Issue: Can't connect to backend**
+
 ```
 Failed to fetch from http://localhost:8000
 ```
+
 **Solution:**
+
 - Verify backend is running: `curl http://localhost:8000/healthz`
 - Check CORS is enabled in `app/main.py`
 - Clear browser cache
@@ -1331,10 +1411,13 @@ Failed to fetch from http://localhost:8000
 ---
 
 **Issue: Type errors after changes**
+
 ```
 Type 'X' is not assignable to type 'Y'
 ```
+
 **Solution:**
+
 ```bash
 # Restart TypeScript server in VS Code
 # Cmd+Shift+P -> "TypeScript: Restart TS Server"
@@ -1346,10 +1429,13 @@ npm run build
 ---
 
 **Issue: Blank page after build**
+
 ```
 Page shows nothing in production
 ```
+
 **Solution:**
+
 - Check browser console for errors
 - Verify `VITE_API_URL` is set correctly
 - Check base path in `vite.config.ts`
@@ -1358,11 +1444,13 @@ Page shows nothing in production
 ### Performance Issues
 
 **Slow responses:**
+
 - Use a smaller model: `llama3.2:1b`
 - Increase `MODEL_TIMEOUT_S`
 - Check Ollama GPU usage: `nvidia-smi` (if NVIDIA GPU)
 
 **High memory usage:**
+
 - Reduce `MAX_HISTORY`
 - Use smaller model
 - Monitor with: `htop` or `Activity Monitor`
@@ -1414,28 +1502,33 @@ Contributions are welcome! Whether you're fixing bugs, adding features, or impro
 ### How to Contribute
 
 1. **Fork the repository**
+
    ```bash
    # Click "Fork" on GitHub
    ```
 
 2. **Clone your fork**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/agno-ollama-chatbot.git
    cd agno-ollama-chatbot
    ```
 
 3. **Create a feature branch**
+
    ```bash
    git checkout -b feature/amazing-feature
    ```
 
 4. **Make your changes**
+
    - Write clear, commented code
    - Follow existing code style
    - Add tests for new features
    - Update documentation
 
 5. **Test your changes**
+
    ```bash
    # Backend
    cd backend
@@ -1448,12 +1541,14 @@ Contributions are welcome! Whether you're fixing bugs, adding features, or impro
    ```
 
 6. **Commit your changes**
+
    ```bash
    git add .
    git commit -m "Add amazing feature"
    ```
 
 7. **Push to your fork**
+
    ```bash
    git push origin feature/amazing-feature
    ```
@@ -1506,6 +1601,7 @@ SOFTWARE.
 ## 🙏 Acknowledgments
 
 ### Technologies & Frameworks
+
 - **[Agno](https://agno.com/)** - Excellent agent framework with first-class PostgreSQL support
 - **[Ollama](https://ollama.com/)** - Making local LLM inference accessible to everyone
 - **[FastAPI](https://fastapi.tiangolo.com/)** - Modern, fast web framework for Python
@@ -1516,10 +1612,12 @@ SOFTWARE.
 - **[Redux Toolkit](https://redux-toolkit.js.org/)** - Modern Redux made simple
 
 ### Development Tools
+
 - **[Claude Code](https://claude.ai/code)** - AI coding assistant that developed this entire project
 - **[Anthropic](https://www.anthropic.com/)** - For creating Claude and advancing AI safety
 
 ### Community
+
 - Open source community for inspiration and tools
 - GitHub for hosting and collaboration
 - All contributors who will improve this project
@@ -1555,6 +1653,7 @@ Explore comprehensive documentation:
 ## 🎯 Roadmap
 
 ### Phase 1: Core Features ✅ (Complete)
+
 - [x] FastAPI backend with Agno integration
 - [x] PostgreSQL database (Neon)
 - [x] Streaming chat with SSE
@@ -1568,6 +1667,7 @@ Explore comprehensive documentation:
 - [x] Copy button for assistant messages
 
 ### Phase 2: Enhancements 🚧 (Upcoming)
+
 - [ ] User authentication & multi-user support
 - [ ] Conversation sharing
 - [ ] Export conversations (JSON, Markdown, PDF)
@@ -1578,6 +1678,7 @@ Explore comprehensive documentation:
 - [ ] Voice input support
 
 ### Phase 3: Advanced Features 🔮 (Future)
+
 - [ ] Multi-agent workflows (Agno Teams)
 - [ ] Tool integration (web search, calculator, etc.)
 - [ ] File upload and analysis
@@ -1588,6 +1689,7 @@ Explore comprehensive documentation:
 - [ ] Analytics dashboard
 
 ### Phase 4: Scale & Performance 🚀 (Future)
+
 - [ ] Redis caching
 - [ ] WebSocket support
 - [ ] Horizontal scaling

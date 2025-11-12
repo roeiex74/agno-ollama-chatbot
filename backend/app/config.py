@@ -25,7 +25,9 @@ class Settings(BaseSettings):
     )
 
     # Environment
-    env: Environment = Field(default=Environment.LOCAL, description="Environment type")
+    env: Environment = Field(
+        default=Environment.LOCAL, description="Environment type"
+    )
 
     # Ollama configuration
     ollama_model: str = Field(
@@ -39,9 +41,9 @@ class Settings(BaseSettings):
     )
 
     # Database configuration
-    postgres_url: str = Field(
+    database_url: str = Field(
         default="postgresql+psycopg://user:pass@localhost:5432/db",
-        description="PostgreSQL connection URL"
+        description="PostgreSQL connection URL",
     )
     max_history: int = Field(
         default=20, description="Maximum conversation history to maintain"

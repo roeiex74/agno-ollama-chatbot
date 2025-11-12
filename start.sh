@@ -87,9 +87,9 @@ if [ ! -f ".env" ]; then
     return 1
 fi
 
-if ! grep -q "POSTGRES_URL=" .env 2>/dev/null; then
-    log_warning "POSTGRES_URL missing in .env"
-    echo -e "${Y}Please ensure your .env file contains POSTGRES_URL configuration${NC}\n"
+if ! grep -q "DATABASE_URL=" .env 2>/dev/null; then
+    log_warning "DATABASE_URL missing in .env"
+    echo -e "${Y}Please ensure your .env file contains DATABASE_URL configuration${NC}\n"
     return 1
 fi
 

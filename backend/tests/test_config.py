@@ -35,7 +35,7 @@ def test_custom_ollama_settings():
     settings = Settings(
         ollama_model="llama3.3:70b",
         ollama_host="http://custom-host:11434",
-        model_timeout_s=120
+        model_timeout_s=120,
     )
 
     assert settings.ollama_model == "llama3.3:70b"
@@ -45,10 +45,7 @@ def test_custom_ollama_settings():
 
 def test_custom_server_settings():
     """Test custom server configuration."""
-    settings = Settings(
-        host="127.0.0.1",
-        port=9000
-    )
+    settings = Settings(host="127.0.0.1", port=9000)
 
     assert settings.host == "127.0.0.1"
     assert settings.port == 9000
@@ -60,8 +57,8 @@ def test_max_history_setting():
     assert settings.max_history == 50
 
 
-def test_postgres_url_setting():
+def test_database_url_setting():
     """Test PostgreSQL URL configuration."""
     custom_url = "postgresql+psycopg://myuser:mypass@db.example.com:5432/mydb"
-    settings = Settings(postgres_url=custom_url)
-    assert settings.postgres_url == custom_url
+    settings = Settings(database_url=custom_url)
+    assert settings.database_url == custom_url

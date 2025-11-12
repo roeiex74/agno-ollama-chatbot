@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     global chatbot_agent
 
     # Startup: Initialize PostgreSQL database and agents
-    db = PostgresDb(db_url=settings.postgres_url)
+    db = PostgresDb(db_url=settings.database_url)
 
     chatbot_agent = ChatbotAgent(db=db)
 
@@ -70,7 +70,8 @@ class ChatRequest(BaseModel):
 
     message: str = Field(..., description="User message")
     conversation_id: Optional[str] = Field(
-        None, description="Optional conversation ID (generated if not provided)"
+        None,
+        description="Optional conversation ID (generated if not provided)",
     )
 
 
@@ -98,7 +99,9 @@ class ConversationSummary(BaseModel):
     title: Optional[str] = Field(None, description="Conversation title")
     message_count: int = Field(..., description="Number of messages")
     created_at: Optional[str] = Field(None, description="Creation timestamp")
-    updated_at: Optional[str] = Field(None, description="Last update timestamp")
+    updated_at: Optional[str] = Field(
+        None, description="Last update timestamp"
+    )
 
 
 class ConversationDetail(BaseModel):
@@ -108,7 +111,9 @@ class ConversationDetail(BaseModel):
     title: Optional[str] = Field(None, description="Conversation title")
     messages: List[dict] = Field(..., description="Conversation messages")
     created_at: Optional[str] = Field(None, description="Creation timestamp")
-    updated_at: Optional[str] = Field(None, description="Last update timestamp")
+    updated_at: Optional[str] = Field(
+        None, description="Last update timestamp"
+    )
 
 
 class UpdateTitleRequest(BaseModel):
@@ -221,7 +226,9 @@ async def list_conversations() -> List[ConversationSummary]:
 
     try:
         # Get all agent sessions from database
-        sessions = chatbot_agent.db.get_sessions(session_type=SessionType.AGENT)
+        sessions = chatbot_agent.db.get_sessions(
+            session_type=SessionType.AGENT
+        )
 
         # Convert to conversation summaries
         summaries = []
@@ -234,7 +241,7 @@ async def list_conversations() -> List[ConversationSummary]:
             if chat_history:
                 for msg in chat_history:
                     role = None
-                    if hasattr(msg, 'role'):
+                    if hasattr(msg, "role"):
                         role = msg.role
                     elif isinstance(msg, dict):
                         role = msg.get("role")
@@ -252,27 +259,35 @@ async def list_conversations() -> List[ConversationSummary]:
                 for msg in chat_history:
                     msg_role = None
                     msg_content = None
-                    if hasattr(msg, 'role'):
+                    if hasattr(msg, "role"):
                         msg_role = msg.role
-                        msg_content = getattr(msg, 'content', "")
+                        msg_content = getattr(msg, "content", "")
                     elif isinstance(msg, dict):
                         msg_role = msg.get("role")
                         msg_content = msg.get("content", "")
 
                     if msg_role == "user" and msg_content:
-                        title = msg_content[:50] + ("..." if len(msg_content) > 50 else "")
+                        title = msg_content[:50] + (
+                            "..." if len(msg_content) > 50 else ""
+                        )
                         break
 
             # Convert timestamps (epoch integers) to ISO format strings
             created_at_str = None
             if session.created_at:
                 from datetime import datetime
-                created_at_str = datetime.fromtimestamp(session.created_at).isoformat()
+
+                created_at_str = datetime.fromtimestamp(
+                    session.created_at
+                ).isoformat()
 
             updated_at_str = None
             if session.updated_at:
                 from datetime import datetime
-                updated_at_str = datetime.fromtimestamp(session.updated_at).isoformat()
+
+                updated_at_str = datetime.fromtimestamp(
+                    session.updated_at
+                ).isoformat()
 
             summaries.append(
                 ConversationSummary(
@@ -286,8 +301,7 @@ async def list_conversations() -> List[ConversationSummary]:
 
         # Sort by updated_at in descending order (newest first)
         summaries.sort(
-            key=lambda x: x.updated_at if x.updated_at else "",
-            reverse=True
+            key=lambda x: x.updated_at if x.updated_at else "", reverse=True
         )
 
         return summaries
@@ -316,12 +330,13 @@ async def get_conversation(conversation_id: str) -> ConversationDetail:
     try:
         # Read session from database
         session = chatbot_agent.db.get_session(
-            session_id=conversation_id,
-            session_type=SessionType.AGENT
+            session_id=conversation_id, session_type=SessionType.AGENT
         )
 
         if session is None:
-            raise HTTPException(status_code=404, detail="Conversation not found")
+            raise HTTPException(
+                status_code=404, detail="Conversation not found"
+            )
 
         # Get chat history from session
         chat_history = session.get_chat_history()
@@ -331,14 +346,11 @@ async def get_conversation(conversation_id: str) -> ConversationDetail:
         if chat_history:
             for msg in chat_history:
                 msg_dict = None
-                if hasattr(msg, 'to_dict'):
+                if hasattr(msg, "to_dict"):
                     msg_dict = msg.to_dict()
-                elif hasattr(msg, 'role') and hasattr(msg, 'content'):
+                elif hasattr(msg, "role") and hasattr(msg, "content"):
                     # Convert Message object to dict manually
-                    msg_dict = {
-                        "role": msg.role,
-                        "content": msg.content
-                    }
+                    msg_dict = {"role": msg.role, "content": msg.content}
                 elif isinstance(msg, dict):
                     msg_dict = msg
 
@@ -353,19 +365,27 @@ async def get_conversation(conversation_id: str) -> ConversationDetail:
 
         if title == "New Chat" and messages and len(messages) > 0:
             first_message = messages[0]
-            if isinstance(first_message, dict) and first_message.get("role") == "user":
+            if (
+                isinstance(first_message, dict)
+                and first_message.get("role") == "user"
+            ):
                 content = first_message.get("content", "")
                 title = content[:50] + ("..." if len(content) > 50 else "")
 
         # Convert timestamps (epoch integers) to ISO format strings
         from datetime import datetime
+
         created_at_str = None
         if session.created_at:
-            created_at_str = datetime.fromtimestamp(session.created_at).isoformat()
+            created_at_str = datetime.fromtimestamp(
+                session.created_at
+            ).isoformat()
 
         updated_at_str = None
         if session.updated_at:
-            updated_at_str = datetime.fromtimestamp(session.updated_at).isoformat()
+            updated_at_str = datetime.fromtimestamp(
+                session.updated_at
+            ).isoformat()
 
         return ConversationDetail(
             conversation_id=session.session_id,
@@ -431,12 +451,13 @@ async def update_conversation_title(
     try:
         # Get the session
         session = chatbot_agent.db.get_session(
-            session_id=conversation_id,
-            session_type=SessionType.AGENT
+            session_id=conversation_id, session_type=SessionType.AGENT
         )
 
         if session is None:
-            raise HTTPException(status_code=404, detail="Conversation not found")
+            raise HTTPException(
+                status_code=404, detail="Conversation not found"
+            )
 
         # Update session_data with the new name
         if session.session_data is None:
@@ -456,7 +477,8 @@ async def update_conversation_title(
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error updating conversation title: {str(e)}"
+            status_code=500,
+            detail=f"Error updating conversation title: {str(e)}",
         )
 
 
