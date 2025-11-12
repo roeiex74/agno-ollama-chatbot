@@ -122,7 +122,9 @@ log_success "Frontend ready"
 #############################################
 log_section "Starting Ollama"
 cd "$ROOT/backend"
+set -a
 source .env
+set +a
 MODEL="${OLLAMA_MODEL:-llama3.2:1b}"
 
 if ! curl -s http://localhost:11434/api/tags >/dev/null 2>&1; then
@@ -144,7 +146,9 @@ log_success "Ollama ready with $MODEL"
 log_section "Starting Backend"
 cd "$ROOT/backend"
 source venv/bin/activate
+set -a
 source .env
+set +a
 PORT="${PORT:-8000}"
 
 python3 -m uvicorn app.main:app --host 0.0.0.0 --port "$PORT" >"$LOGS_DIR/backend.log" 2>&1 &

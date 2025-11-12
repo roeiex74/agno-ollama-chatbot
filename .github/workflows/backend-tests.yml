@@ -8,9 +8,7 @@ on:
       - ".github/workflows/backend-tests.yml"
   pull_request:
     branches: ["main", "master"]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-tests.yml"
+    # Removed path filters - backend tests will run on all PRs
 
 jobs:
   test:
@@ -42,7 +40,7 @@ jobs:
           OLLAMA_MODEL: llama3.2:3b
           OLLAMA_HOST: http://localhost:11434
         run: |
-          pytest tests/test_health.py tests/test_config.py tests/test_chat_ui.py -v --tb=short
+          pytest tests/ -v --tb=short
 
       - name: Run tests with coverage
         env:
@@ -51,7 +49,7 @@ jobs:
           OLLAMA_HOST: http://localhost:11434
         run: |
           pip install pytest-cov
-          pytest tests/test_health.py tests/test_config.py tests/test_chat_ui.py -v --cov=app --cov-report=term-missing --cov-report=xml
+          pytest tests/ -v --cov=app --cov-report=term-missing --cov-report=xml
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
