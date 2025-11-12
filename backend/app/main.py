@@ -22,28 +22,33 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.agents.chatbot_agent import ChatbotAgent
+from app.agents.title_agent import TitleAgent
 from app.config import settings
 
 
-# Global agent instance
+# Global agent instances
 chatbot_agent: Optional[ChatbotAgent] = None
+title_agent: Optional[TitleAgent] = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifespan (startup/shutdown)."""
-    global chatbot_agent
+    global chatbot_agent, title_agent
 
-    # Startup: Initialize PostgreSQL database and agent
+    # Startup: Initialize PostgreSQL database and agents
     db = PostgresDb(db_url=settings.postgres_url)
 
     chatbot_agent = ChatbotAgent(db=db)
+    title_agent = TitleAgent()
 
     yield
 
     # Shutdown: Cleanup resources
     if chatbot_agent:
         await chatbot_agent.cleanup()
+    if title_agent:
+        await title_agent.cleanup()
 
 
 # FastAPI app
@@ -115,6 +120,18 @@ class UpdateTitleRequest(BaseModel):
     """Request to update conversation title."""
 
     title: str = Field(..., description="New conversation title")
+
+
+class GenerateTitleRequest(BaseModel):
+    """Request to generate a conversation title."""
+
+    message: str = Field(..., description="User message to generate title from")
+
+
+class GenerateTitleResponse(BaseModel):
+    """Response with generated title."""
+
+    title: str = Field(..., description="Generated conversation title")
 
 
 # Endpoints
@@ -206,6 +223,34 @@ async def chat_stream(request: ChatRequest) -> StreamingResponse:
     )
 
 
+@app.post("/generate-title", response_model=GenerateTitleResponse)
+async def generate_title(request: GenerateTitleRequest) -> GenerateTitleResponse:
+    """Generate a conversation title from a user message using AI.
+
+    Args:
+        request: Request with user message
+
+    Returns:
+        Generated title (approximately 20 characters)
+
+    Raises:
+        HTTPException: If title agent is not initialized
+    """
+    if title_agent is None:
+        raise HTTPException(status_code=503, detail="Title agent not initialized")
+
+    try:
+        # Generate title using TitleAgent
+        title = await title_agent.generate_title(request.message)
+        return GenerateTitleResponse(title=title)
+    except Exception as e:
+        # Fallback: truncate message to 20 characters
+        fallback_title = request.message[:20].strip()
+        if len(request.message) > 20:
+            fallback_title += "..."
+        return GenerateTitleResponse(title=fallback_title)
+
+
 @app.get("/conversations", response_model=List[ConversationSummary])
 async def list_conversations() -> List[ConversationSummary]:
     """List all conversations.
@@ -283,6 +328,12 @@ async def list_conversations() -> List[ConversationSummary]:
                     updated_at=updated_at_str,
                 )
             )
+
+        # Sort by updated_at in descending order (newest first)
+        summaries.sort(
+            key=lambda x: x.updated_at if x.updated_at else "",
+            reverse=True
+        )
 
         return summaries
     except Exception as e:

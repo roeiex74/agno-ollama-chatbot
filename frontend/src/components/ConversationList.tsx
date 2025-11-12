@@ -1,9 +1,11 @@
-import { MessageSquarePlus } from "lucide-react";
+import { MessageSquarePlus, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
-import { Separator } from "./ui/separator";
 import { cn } from "@/lib/utils";
 import type { Conversation } from "@/data/conversations";
+import { groupConversationsByDate, getNonEmptyGroups, GROUP_LABELS } from "@/utils/dateGrouping";
+import { useState } from "react";
+import { useDeleteConversationMutation } from "@/store/api/conversationsApi";
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -18,75 +20,121 @@ export function ConversationList({
   onSelectConversation,
   onNewConversation,
 }: ConversationListProps) {
-  const formatRelativeTime = (timestamp: number): string => {
-    const now = Date.now();
-    const diffInSeconds = Math.floor((now - timestamp) / 1000);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [deleteConversation] = useDeleteConversationMutation();
 
-    if (diffInSeconds < 60) return "Just now";
-    if (diffInSeconds < 3600)
-      return `${Math.floor(diffInSeconds / 60)} min ago`;
-    if (diffInSeconds < 86400)
-      return `${Math.floor(diffInSeconds / 3600)} hr ago`;
-    if (diffInSeconds < 604800)
-      return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  // Group conversations by date
+  const groupedConversations = groupConversationsByDate(conversations);
+  const nonEmptyGroups = getNonEmptyGroups(groupedConversations);
 
-    return new Date(timestamp).toLocaleDateString([], {
-      month: "short",
-      day: "numeric",
-    });
+  const handleDelete = async (e: React.MouseEvent, conversationId: string) => {
+    e.stopPropagation();
+    if (confirm("Are you sure you want to delete this conversation?")) {
+      try {
+        await deleteConversation(conversationId).unwrap();
+      } catch (error) {
+        console.error("Failed to delete conversation:", error);
+      }
+    }
   };
 
   return (
-    <div className="flex h-full flex-col">
-      {/* New Chat Button */}
-      <div className="p-4">
+    <div className="flex h-full flex-col bg-background">
+      {/* New Chat Button - ChatGPT Style */}
+      <div className="p-3">
         <Button
           onClick={onNewConversation}
-          className="w-full justify-start gap-2 cursor-pointer hover:bg-accent transition-colors"
+          className={cn(
+            "w-full justify-start gap-3 h-11",
+            "bg-transparent hover:bg-accent",
+            "border border-border/40",
+            "text-sm font-medium",
+            "transition-all duration-200",
+            "cursor-pointer"
+          )}
           variant="outline"
         >
           <MessageSquarePlus className="h-4 w-4" />
-          New Chat
+          New chat
         </Button>
       </div>
 
-      <Separator />
-
-      {/* Conversations List */}
-      <ScrollArea className="flex-1">
-        <div className="space-y-1 p-2">
-          {conversations.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              No conversations yet.
-              <br />
-              Start a new chat!
-            </div>
-          ) : (
-            conversations.map((conversation) => (
-              <button
-                key={conversation.id}
-                onClick={() => onSelectConversation(conversation.id)}
-                className={cn(
-                  "w-full rounded-lg px-3 py-2.5 text-left transition-colors cursor-pointer",
-                  "hover:bg-accent hover:text-accent-foreground",
-                  currentConversationId === conversation.id &&
-                    "bg-accent text-accent-foreground"
-                )}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">
-                      {conversation.title}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {formatRelativeTime(conversation.updatedAt)}
-                    </p>
-                  </div>
+      {/* Conversations List with Time-Based Grouping */}
+      <ScrollArea className="flex-1 px-2">
+        {conversations.length === 0 ? (
+          <div className="px-4 py-12 text-center text-sm text-muted-foreground">
+            <MessageSquarePlus className="h-12 w-12 mx-auto mb-3 opacity-20" />
+            <p className="font-medium mb-1">No conversations yet</p>
+            <p className="text-xs">Start a new chat to begin</p>
+          </div>
+        ) : (
+          <div className="space-y-6 pb-4">
+            {nonEmptyGroups.map(([groupKey, groupConversations]) => (
+              <div key={groupKey} className="space-y-1">
+                {/* Section Header */}
+                <div className="px-3 py-1.5">
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {GROUP_LABELS[groupKey]}
+                  </h3>
                 </div>
-              </button>
-            ))
-          )}
-        </div>
+
+                {/* Conversations in this group */}
+                <div className="space-y-0.5">
+                  {groupConversations.map((conversation) => (
+                    <div
+                      key={conversation.id}
+                      className="relative group"
+                      onMouseEnter={() => setHoveredId(conversation.id)}
+                      onMouseLeave={() => setHoveredId(null)}
+                    >
+                      <button
+                        onClick={() => onSelectConversation(conversation.id)}
+                        className={cn(
+                          "w-full rounded-lg px-3 py-2.5 text-left",
+                          "transition-all duration-200 cursor-pointer",
+                          "flex items-center justify-between gap-2",
+                          currentConversationId === conversation.id
+                            ? "bg-accent/70 text-accent-foreground"
+                            : "hover:bg-accent/40 text-foreground"
+                        )}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={cn(
+                              "truncate text-sm",
+                              currentConversationId === conversation.id
+                                ? "font-semibold"
+                                : "font-medium"
+                            )}
+                          >
+                            {conversation.title}
+                          </p>
+                        </div>
+
+                        {/* Delete button - shows on hover */}
+                        {hoveredId === conversation.id && (
+                          <button
+                            onClick={(e) => handleDelete(e, conversation.id)}
+                            className={cn(
+                              "opacity-0 group-hover:opacity-100",
+                              "transition-opacity duration-200",
+                              "p-1.5 rounded-md",
+                              "hover:bg-destructive/10 hover:text-destructive",
+                              "cursor-pointer"
+                            )}
+                            title="Delete conversation"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </ScrollArea>
     </div>
   );

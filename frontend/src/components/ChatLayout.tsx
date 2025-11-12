@@ -50,11 +50,12 @@ export function ChatLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar - ChatGPT Style */}
       <aside
         className={cn(
-          "hidden border-r bg-card transition-all duration-300 md:block",
-          sidebarOpen ? "w-64" : "w-0"
+          "hidden border-r transition-all duration-300 md:block",
+          "bg-muted/30",
+          sidebarOpen ? "w-72" : "w-0"
         )}
       >
         {sidebarOpen && (
@@ -73,12 +74,12 @@ export function ChatLayout({
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center gap-2 px-4 py-3">
-          {/* Desktop sidebar toggle */}
+          {/* Desktop sidebar toggle - Improved styling */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden md:flex cursor-pointer hover:bg-accent transition-colors"
+            className="hidden md:flex cursor-pointer hover:bg-accent/70 transition-colors rounded-lg"
           >
             {sidebarOpen ? (
               <PanelLeft className="h-5 w-5" />
@@ -94,7 +95,7 @@ export function ChatLayout({
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0">
+            <SheetContent side="left" className="w-72 p-0 bg-muted/30">
               <ConversationList
                 conversations={conversations}
                 currentConversationId={currentConversationId}

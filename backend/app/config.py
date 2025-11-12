@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     model_timeout_s: int = Field(
         default=60, description="Model request timeout in seconds"
     )
+    title_timeout_s: int = Field(
+        default=5, description="Title generation timeout in seconds"
+    )
 
     # Database configuration
     postgres_url: str = Field(

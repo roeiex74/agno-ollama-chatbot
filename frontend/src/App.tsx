@@ -41,6 +41,10 @@ function ChatView() {
         createdAt: summary.created_at ? new Date(summary.created_at).getTime() : Date.now(),
         updatedAt: summary.updated_at ? new Date(summary.updated_at).getTime() : Date.now(),
       }));
+
+      // Sort by updatedAt in descending order (newest first)
+      loadedConversations.sort((a, b) => b.updatedAt - a.updatedAt);
+
       dispatch(setConversations(loadedConversations));
     }
   }, [conversationSummaries, dispatch]);

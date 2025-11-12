@@ -24,6 +24,14 @@ export interface UpdateTitleRequest {
   title: string;
 }
 
+export interface GenerateTitleRequest {
+  message: string;
+}
+
+export interface GenerateTitleResponse {
+  title: string;
+}
+
 export const conversationsApi = createApi({
   reducerPath: "conversationsApi",
   baseQuery: fetchBaseQuery({ baseUrl: API_CONFIG.BASE_URL }),
@@ -67,6 +75,15 @@ export const conversationsApi = createApi({
         { type: "Conversation", id: conversationId },
       ],
     }),
+
+    // Generate conversation title from message
+    generateTitle: builder.mutation<GenerateTitleResponse, GenerateTitleRequest>({
+      query: (request) => ({
+        url: "/generate-title",
+        method: "POST",
+        body: request,
+      }),
+    }),
   }),
 });
 
@@ -98,4 +115,5 @@ export const {
   useLazyGetConversationQuery,
   useDeleteConversationMutation,
   useUpdateConversationTitleMutation,
+  useGenerateTitleMutation,
 } = conversationsApi;
