@@ -70,6 +70,28 @@ export const conversationsApi = createApi({
   }),
 });
 
+// Helper function to create streaming chat request
+// Note: This is used by useStreamingChat hook, not called directly as a mutation
+// because RTK Query doesn't natively support SSE streaming.
+// This function is part of the Redux API layer to maintain centralized API configuration.
+export const createStreamingChatRequest = (
+  message: string,
+  conversationId: string,
+  signal?: AbortSignal
+) => {
+  return fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CHAT_STREAM}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message,
+      conversation_id: conversationId,
+    }),
+    signal,
+  });
+};
+
 export const {
   useGetConversationsQuery,
   useGetConversationQuery,

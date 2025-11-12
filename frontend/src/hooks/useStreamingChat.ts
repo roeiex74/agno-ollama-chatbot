@@ -7,9 +7,11 @@ import {
   selectAllConversations,
 } from "@/store/slices/conversationsSlice";
 import { setStreaming, setError } from "@/store/slices/uiSlice";
-import { API_CONFIG } from "@/config/api";
 import type { Message, StreamChunk } from "@/types/api";
-import { useUpdateConversationTitleMutation } from "@/store/api/conversationsApi";
+import {
+  useUpdateConversationTitleMutation,
+  createStreamingChatRequest
+} from "@/store/api/conversationsApi";
 
 export function useStreamingChat() {
   const dispatch = useAppDispatch();
@@ -57,20 +59,11 @@ export function useStreamingChat() {
         const abortController = new AbortController();
         abortControllerRef.current = abortController;
 
-        // Make POST request with fetch
-        const response = await fetch(
-          API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.CHAT_STREAM,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              message,
-              conversation_id: conversationId,
-            }),
-            signal: abortController.signal,
-          }
+        // Make POST request using Redux API helper (maintains consistency with other API calls)
+        const response = await createStreamingChatRequest(
+          message,
+          conversationId,
+          abortController.signal
         );
 
         if (!response.ok) {
