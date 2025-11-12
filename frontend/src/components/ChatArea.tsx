@@ -47,6 +47,7 @@ export function ChatArea({ messages, isStreaming = false }: ChatAreaProps) {
           return (
             <ChatMessage
               key={message.id}
+              messageId={message.id}
               role={message.role}
               content={message.content}
               timestamp={new Date(message.timestamp)}
