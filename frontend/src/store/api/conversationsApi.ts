@@ -24,10 +24,21 @@ export interface UpdateTitleRequest {
   title: string;
 }
 
+export interface GenerateTitleRequest {
+  message: string;
+}
+
+export interface GenerateTitleResponse {
+  title: string;
+}
+
 export const conversationsApi = createApi({
   reducerPath: "conversationsApi",
   baseQuery: fetchBaseQuery({ baseUrl: API_CONFIG.BASE_URL }),
   tagTypes: ["Conversations", "Conversation"],
+  // Disable automatic refetching to prevent conversations from jumping around
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
   endpoints: (builder) => ({
     // List all conversations
     getConversations: builder.query<ConversationSummary[], void>({
@@ -62,13 +73,45 @@ export const conversationsApi = createApi({
         method: "PATCH",
         body: { title },
       }),
+      // Only invalidate the specific conversation, not the entire list
+      // This prevents unnecessary refetches that change conversation order
       invalidatesTags: (_result, _error, { conversationId }) => [
-        "Conversations",
         { type: "Conversation", id: conversationId },
       ],
     }),
+
+    // Generate conversation title from message
+    generateTitle: builder.mutation<GenerateTitleResponse, GenerateTitleRequest>({
+      query: (request) => ({
+        url: "/generate-title",
+        method: "POST",
+        body: request,
+      }),
+    }),
   }),
 });
+
+// Helper function to create streaming chat request
+// Note: This is used by useStreamingChat hook, not called directly as a mutation
+// because RTK Query doesn't natively support SSE streaming.
+// This function is part of the Redux API layer to maintain centralized API configuration.
+export const createStreamingChatRequest = (
+  message: string,
+  conversationId: string,
+  signal?: AbortSignal
+) => {
+  return fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CHAT_STREAM}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message,
+      conversation_id: conversationId,
+    }),
+    signal,
+  });
+};
 
 export const {
   useGetConversationsQuery,
@@ -76,4 +119,5 @@ export const {
   useLazyGetConversationQuery,
   useDeleteConversationMutation,
   useUpdateConversationTitleMutation,
+  useGenerateTitleMutation,
 } = conversationsApi;

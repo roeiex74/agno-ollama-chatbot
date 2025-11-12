@@ -9,7 +9,7 @@ A production-ready, full-stack chatbot application powered by **Agno** (agent fr
 ![Node](https://img.shields.io/badge/node-20+-green.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)
 ![FastAPI](https://img.shields.io/badge/fastapi-0.115+-green.svg)
-![React](https://img.shields.io/badge/react-18+-blue.svg)
+![React](https://img.shields.io/badge/react-19+-blue.svg)
 
 ## 📋 Table of Contents
 
@@ -48,6 +48,9 @@ A production-ready, full-stack chatbot application powered by **Agno** (agent fr
 - ⏱️ **Relative Timestamps**: Human-readable time displays (e.g., "5 min ago", "2 hr ago")
 - 🎬 **Loading States**: Visual feedback during all async operations
 - 🛑 **Stream Cancellation**: Stop button to cancel ongoing streaming responses
+- 📄 **Markdown Rendering**: Full GitHub Flavored Markdown support with syntax highlighting
+- 🎨 **Memoized Rendering**: Performance-optimized markdown with block-level memoization for smooth streaming
+- 📋 **Copy Functionality**: One-click copy button for assistant messages
 
 ### Technical Features
 - 🏗️ **Type-Safe**: Full TypeScript implementation on frontend with strict type checking
@@ -332,15 +335,19 @@ First Message Sent
 ### Frontend Stack
 | Technology | Version | Purpose |
 |-----------|---------|---------|
-| **[React](https://react.dev/)** | 18+ | Component-based UI library |
+| **[React](https://react.dev/)** | 19+ | Component-based UI library |
 | **[TypeScript](https://www.typescriptlang.org/)** | 5.6+ | Type-safe JavaScript |
-| **[Vite](https://vitejs.dev/)** | 6.x | Next generation frontend tooling |
+| **[Vite](https://vitejs.dev/)** | 7.x | Next generation frontend tooling |
 | **[Redux Toolkit](https://redux-toolkit.js.org/)** | 2.x | Official Redux toolset (simplified) |
 | **[RTK Query](https://redux-toolkit.js.org/rtk-query/overview)** | - | Powerful data fetching & caching |
 | **[shadcn/ui](https://ui.shadcn.com/)** | Latest | Re-usable components (Radix UI based) |
-| **[Tailwind CSS](https://tailwindcss.com/)** | 3.x | Utility-first CSS framework |
+| **[Tailwind CSS](https://tailwindcss.com/)** | 4.x | Utility-first CSS framework |
 | **[Lucide React](https://lucide.dev/)** | Latest | Beautiful & consistent icon library |
 | **[React Router](https://reactrouter.com/)** | 7.x | Declarative routing for React |
+| **[React Markdown](https://github.com/remarkjs/react-markdown)** | 10.x | Markdown rendering with React components |
+| **[Marked](https://marked.js.org/)** | 17.x | Fast markdown parser for block-level parsing |
+| **[rehype-highlight](https://github.com/rehypejs/rehype-highlight)** | 7.x | Syntax highlighting for code blocks |
+| **[remark-gfm](https://github.com/remarkjs/remark-gfm)** | 4.x | GitHub Flavored Markdown support |
 
 ### DevOps & Development Tools
 | Tool | Purpose |
@@ -582,9 +589,9 @@ agno-ollama-chatbot/
 │   │   │   ├── ChatLayout.tsx       # Main layout (sidebar + chat)
 │   │   │   ├── ChatMessage.tsx      # Individual message component
 │   │   │   ├── ConversationList.tsx # Sidebar conversation list
+│   │   │   ├── memoized-markdown.tsx # Performance-optimized markdown renderer
 │   │   │   │
 │   │   │   └── ui/                  # shadcn/ui components
-│   │   │       ├── avatar.tsx
 │   │   │       ├── button.tsx
 │   │   │       ├── card.tsx
 │   │   │       ├── input.tsx
@@ -597,13 +604,11 @@ agno-ollama-chatbot/
 │   │   │
 │   │   ├── hooks/                   # Custom React Hooks
 │   │   │   ├── useStreamingChat.ts  # SSE streaming logic
-│   │   │   ├── use-auto-resize-textarea.ts
 │   │   │   └── use-mobile.ts
 │   │   │
 │   │   ├── store/                   # Redux Store
 │   │   │   ├── api/                 # RTK Query API Definitions
-│   │   │   │   ├── chatApi.ts       # Chat endpoints (future use)
-│   │   │   │   └── conversationsApi.ts # Conversation CRUD
+│   │   │   │   └── conversationsApi.ts # Conversation CRUD & streaming
 │   │   │   │
 │   │   │   ├── slices/              # Redux Slices
 │   │   │   │   ├── conversationsSlice.ts # Conversation state
@@ -669,8 +674,9 @@ agno-ollama-chatbot/
 #### Frontend
 - **`src/App.tsx`**: Main application component with routing and top-level state
 - **`src/hooks/useStreamingChat.ts`**: Custom hook handling SSE streaming and message updates
-- **`src/store/api/conversationsApi.ts`**: RTK Query API for conversation CRUD operations
+- **`src/store/api/conversationsApi.ts`**: RTK Query API for conversation CRUD operations and streaming helper
 - **`src/components/ChatLayout.tsx`**: Main layout orchestrating sidebar and chat area
+- **`src/components/memoized-markdown.tsx`**: Performance-optimized markdown renderer with block-level memoization
 
 ## ⚙️ Configuration
 
@@ -1552,11 +1558,14 @@ Explore comprehensive documentation:
 - [x] FastAPI backend with Agno integration
 - [x] PostgreSQL database (Neon)
 - [x] Streaming chat with SSE
-- [x] React frontend with TypeScript
+- [x] React 19 frontend with TypeScript
 - [x] Conversation management (CRUD)
-- [x] Redux state management
+- [x] Redux Toolkit state management
 - [x] Auto-title generation
 - [x] Responsive UI design
+- [x] Markdown rendering with syntax highlighting
+- [x] Performance-optimized memoized rendering
+- [x] Copy button for assistant messages
 
 ### Phase 2: Enhancements 🚧 (Upcoming)
 - [ ] User authentication & multi-user support

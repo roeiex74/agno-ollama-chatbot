@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, PanelLeft, PanelLeftOpen } from "lucide-react";
+import { Menu, PanelLeft, PanelLeftOpen, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { ConversationList } from "./ConversationList";
@@ -50,11 +50,12 @@ export function ChatLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar - ChatGPT Style */}
       <aside
         className={cn(
-          "hidden border-r bg-card transition-all duration-300 md:block",
-          sidebarOpen ? "w-64" : "w-0"
+          "hidden border-r transition-all duration-300 md:block",
+          "bg-muted/30",
+          sidebarOpen ? "w-72" : "w-0"
         )}
       >
         {sidebarOpen && (
@@ -73,12 +74,12 @@ export function ChatLayout({
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <header className="flex items-center gap-2 px-4 py-3">
-          {/* Desktop sidebar toggle */}
+          {/* Desktop sidebar toggle - Improved styling */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden md:flex cursor-pointer hover:bg-accent transition-colors"
+            className="hidden md:flex cursor-pointer hover:bg-accent/70 transition-colors rounded-lg"
           >
             {sidebarOpen ? (
               <PanelLeft className="h-5 w-5" />
@@ -90,11 +91,15 @@ export function ChatLayout({
           {/* Mobile sidebar toggle */}
           <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden cursor-pointer hover:bg-accent transition-colors">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden cursor-pointer hover:bg-accent transition-colors"
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0">
+            <SheetContent side="left" className="w-72 p-0 bg-muted/30">
               <ConversationList
                 conversations={conversations}
                 currentConversationId={currentConversationId}
@@ -106,15 +111,18 @@ export function ChatLayout({
 
           {/* Current conversation title */}
           <h1 className="flex-1 truncate text-lg font-semibold">
-            {currentConversation?.title || "ChatGPT"}
+            {currentConversation?.title || "GPT Agent"}
           </h1>
         </header>
 
         {/* Chat Area */}
         <div className="flex-1 overflow-hidden">
           {isLoadingConversation ? (
-            <div className="flex h-full items-center justify-center">
-              <div className="text-muted-foreground">Loading conversation...</div>
+            <div className="flex h-full flex-col items-center justify-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <div className="text-sm text-muted-foreground">
+                Loading conversation...
+              </div>
             </div>
           ) : (
             <ChatArea messages={currentMessages} isStreaming={isStreaming} />

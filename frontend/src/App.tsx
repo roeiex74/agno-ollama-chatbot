@@ -9,6 +9,7 @@ import {
   addConversation,
   setConversations,
   addMessage,
+  loadMessages,
 } from "./store/slices/conversationsSlice";
 import { selectIsStreaming } from "./store/slices/uiSlice";
 import { useStreamingChat } from "./hooks/useStreamingChat";
@@ -41,6 +42,10 @@ function ChatView() {
         createdAt: summary.created_at ? new Date(summary.created_at).getTime() : Date.now(),
         updatedAt: summary.updated_at ? new Date(summary.updated_at).getTime() : Date.now(),
       }));
+
+      // Sort by updatedAt in descending order (newest first)
+      loadedConversations.sort((a, b) => b.updatedAt - a.updatedAt);
+
       dispatch(setConversations(loadedConversations));
     }
   }, [conversationSummaries, dispatch]);
@@ -67,10 +72,9 @@ function ChatView() {
               timestamp: Date.now(), // Use number timestamp instead of Date object
             }));
 
-            // Update the conversation with loaded messages
-            messages.forEach((message) => {
-              dispatch(addMessage({ conversationId: currentConversationId, message }));
-            });
+            // Load historical messages without updating updatedAt
+            // This prevents old conversations from jumping to "Today" when clicked
+            dispatch(loadMessages({ conversationId: currentConversationId, messages }));
 
             setIsLoadingConversation(false);
           })

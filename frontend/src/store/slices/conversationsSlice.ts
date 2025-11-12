@@ -86,6 +86,21 @@ export const conversationsSlice = createSlice({
       }
     },
 
+    // Load historical messages without updating updatedAt
+    // (used when fetching old conversations from backend)
+    loadMessages: (
+      state,
+      action: PayloadAction<{ conversationId: string; messages: Message[] }>
+    ) => {
+      const conversation = state.conversations.find(
+        (c) => c.id === action.payload.conversationId
+      );
+      if (conversation) {
+        conversation.messages = action.payload.messages;
+        // Don't update updatedAt - keep the original timestamp
+      }
+    },
+
     // Clear messages for a specific conversation
     clearCurrentConversationMessages: (
       state,
@@ -114,6 +129,7 @@ export const {
   addMessage,
   updateLastAssistantMessage,
   updateConversationTitle,
+  loadMessages,
   clearCurrentConversationMessages,
   clearConversations,
 } = conversationsSlice.actions;

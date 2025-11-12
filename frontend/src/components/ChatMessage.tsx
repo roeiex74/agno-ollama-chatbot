@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import { MemoizedMarkdown } from "./memoized-markdown";
 import { Button } from "./ui/button";
 import {
   Tooltip,
@@ -14,6 +15,7 @@ interface ChatMessageProps {
   content: string;
   timestamp?: Date;
   isStreaming?: boolean;
+  messageId?: string;
 }
 
 export function ChatMessage({
@@ -21,6 +23,7 @@ export function ChatMessage({
   content,
   timestamp: _timestamp,
   isStreaming = false,
+  messageId,
 }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
 
@@ -67,8 +70,15 @@ export function ChatMessage({
                 Thinking...
               </span>
             </div>
-          ) : (
+          ) : isUser ? (
+            // User messages: plain text
             <div className="whitespace-pre-wrap break-words">{content}</div>
+          ) : (
+            // Assistant messages: render markdown with memoization
+            <MemoizedMarkdown
+              content={content}
+              id={messageId || `msg-${Date.now()}`}
+            />
           )}
         </div>
 

@@ -7,14 +7,18 @@ import {
   selectAllConversations,
 } from "@/store/slices/conversationsSlice";
 import { setStreaming, setError } from "@/store/slices/uiSlice";
-import { API_CONFIG } from "@/config/api";
 import type { Message, StreamChunk } from "@/types/api";
-import { useUpdateConversationTitleMutation } from "@/store/api/conversationsApi";
+import {
+  useUpdateConversationTitleMutation,
+  useGenerateTitleMutation,
+  createStreamingChatRequest
+} from "@/store/api/conversationsApi";
 
 export function useStreamingChat() {
   const dispatch = useAppDispatch();
   const conversations = useAppSelector(selectAllConversations);
   const [updateTitle] = useUpdateConversationTitleMutation();
+  const [generateTitle] = useGenerateTitleMutation();
   const abortControllerRef = useRef<AbortController | null>(null);
   const accumulatedContentRef = useRef<string>("");
 
@@ -29,6 +33,35 @@ export function useStreamingChat() {
       };
 
       dispatch(addMessage({ conversationId, message: userMessage }));
+
+      // Generate title immediately if this is a new conversation
+      const conversation = conversations.find((c) => c.id === conversationId);
+      if (conversation && conversation.title === "New Chat") {
+        // Call AI title generation endpoint immediately (runs in parallel with chat)
+        generateTitle({ message })
+          .unwrap()
+          .then((response) => {
+            const generatedTitle = response.title;
+            // Update title in Redux immediately for instant feedback
+            dispatch(updateConversationTitle({ conversationId, title: generatedTitle }));
+            // Also update in backend
+            return updateTitle({ conversationId, title: generatedTitle });
+          })
+          .then(() => {
+            console.log("Title updated successfully in backend");
+          })
+          .catch((error) => {
+            console.error("Failed to generate or update title:", error);
+            // Fallback: use first 20 chars
+            const fallbackTitle = message.slice(0, 20) + (message.length > 20 ? "..." : "");
+            dispatch(updateConversationTitle({ conversationId, title: fallbackTitle }));
+            updateTitle({ conversationId, title: fallbackTitle })
+              .unwrap()
+              .catch((err) => {
+                console.error("Failed to update fallback title:", err);
+              });
+          });
+      }
 
       // Create placeholder assistant message
       const assistantMessage: Message = {
@@ -57,20 +90,11 @@ export function useStreamingChat() {
         const abortController = new AbortController();
         abortControllerRef.current = abortController;
 
-        // Make POST request with fetch
-        const response = await fetch(
-          API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.CHAT_STREAM,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              message,
-              conversation_id: conversationId,
-            }),
-            signal: abortController.signal,
-          }
+        // Make POST request using Redux API helper (maintains consistency with other API calls)
+        const response = await createStreamingChatRequest(
+          message,
+          conversationId,
+          abortController.signal
         );
 
         if (!response.ok) {
@@ -117,24 +141,6 @@ export function useStreamingChat() {
                     );
                   }
 
-                  // Check if this is the first message and update title
-                  const conversation = conversations.find((c) => c.id === conversationId);
-                  if (conversation && conversation.title === "New Chat") {
-                    // Generate title from first user message
-                    const title = message.slice(0, 50) + (message.length > 50 ? "..." : "");
-
-                    // Update title in backend
-                    updateTitle({ conversationId, title })
-                      .unwrap()
-                      .then(() => {
-                        // Update title in Redux
-                        dispatch(updateConversationTitle({ conversationId, title }));
-                      })
-                      .catch((error) => {
-                        console.error("Failed to update conversation title:", error);
-                      });
-                  }
-
                   dispatch(setStreaming(false));
                   abortControllerRef.current = null;
                 } else if ("delta" in parsed) {
@@ -167,7 +173,7 @@ export function useStreamingChat() {
         dispatch(setStreaming(false));
       }
     },
-    [dispatch, conversations, updateTitle]
+    [dispatch, conversations, updateTitle, generateTitle]
   );
 
   const cancelStream = useCallback(() => {
